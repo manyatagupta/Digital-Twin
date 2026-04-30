@@ -4,12 +4,18 @@ from django.contrib.auth.models import User
 class UserPreference(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     personality_traits = models.TextField(help_text="e.g., Early bird, Tech enthusiast, Cricket lover")
-    favorite_genres = models.JSONField(default=list) # e.g., ["Sci-Fi", "Mystery"]
+    favorite_genres = models.JSONField(default=list) 
+    # Naye fields jo hum add kar rahe hain:
+    diet_preference = models.CharField(max_length=50, choices=[('Veg', 'Veg'), ('Non-Veg', 'Non-Veg')], default='Veg')
+    sleep_cycle = models.CharField(max_length=50, choices=[('Early Bird', 'Early Bird'), ('Night Owl', 'Night Owl')], default='Night Owl')
+
+    def __str__(self):
+        return f"Preferences of {self.user.username}"
 
 class PastChoice(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    scenario = models.CharField(max_length=255) # e.g., "Weekend Evening"
-    choice_made = models.CharField(max_length=255) # e.g., "Watching Cricket"
+    scenario = models.CharField(max_length=255) 
+    choice_made = models.CharField(max_length=255) 
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

@@ -1,1053 +1,1372 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digital Twin — AI Doppelganger</title>
-
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-
-    <style>
-        :root {
-            --bg: #060810;
-            --surface: #0d1117;
-            --surface2: #161b27;
-            --surface3: #1e2535;
-            --accent: #e8ff47;
-            --accent2: #47ffe8;
-            --accent3: #ff6b47;
-            --text: #f0f2f8;
-            --muted: #6b7594;
-            --border: rgba(255,255,255,0.06);
-            --border-hover: rgba(232,255,71,0.3);
-            --glow: rgba(232,255,71,0.15);
-            --font-display: 'Syne', sans-serif;
-            --font-body: 'DM Sans', sans-serif;
-        }
-
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-        html { scroll-behavior: smooth; }
-
-        body {
-            font-family: var(--font-body);
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            overflow-x: hidden;
-            position: relative;
-        }
-
-        /* ── Animated Background Grid ── */
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background-image:
-                linear-gradient(rgba(232,255,71,0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(232,255,71,0.03) 1px, transparent 1px);
-            background-size: 60px 60px;
-            pointer-events: none;
-            z-index: 0;
-            animation: gridShift 20s linear infinite;
-        }
-
-        @keyframes gridShift {
-            0%   { background-position: 0 0; }
-            100% { background-position: 60px 60px; }
-        }
-
-        /* ── Orbs ── */
-        .orb {
-            position: fixed;
-            border-radius: 50%;
-            filter: blur(80px);
-            pointer-events: none;
-            z-index: 0;
-            opacity: 0.18;
-            animation: orbDrift 15s ease-in-out infinite alternate;
-        }
-        .orb-1 { width: 500px; height: 500px; background: #e8ff47; top: -100px; left: -100px; animation-delay: 0s; }
-        .orb-2 { width: 400px; height: 400px; background: #47ffe8; bottom: -100px; right: -80px; animation-delay: -5s; }
-        .orb-3 { width: 300px; height: 300px; background: #ff6b47; top: 50%; left: 60%; animation-delay: -10s; opacity: 0.1; }
-
-        @keyframes orbDrift {
-            0%   { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(40px, 40px) scale(1.1); }
-        }
-
-        /* ── Wrapper ── */
-        .wrapper {
-            position: relative;
-            z-index: 1;
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 40px 20px 80px;
-        }
-
-        /* ── Header ── */
-        .header {
-            text-align: center;
-            margin-bottom: 56px;
-            animation: fadeUp 0.8s ease both;
-        }
-
-        .header-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(232,255,71,0.08);
-            border: 1px solid rgba(232,255,71,0.2);
-            border-radius: 100px;
-            padding: 6px 16px;
-            font-size: 11px;
-            font-weight: 500;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            color: var(--accent);
-            margin-bottom: 24px;
-        }
-
-        .header-badge .dot {
-            width: 6px;
-            height: 6px;
-            background: var(--accent);
-            border-radius: 50%;
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50%       { opacity: 0.4; transform: scale(0.7); }
-        }
-
-        .header h1 {
-            font-family: var(--font-display);
-            font-size: clamp(36px, 7vw, 72px);
-            font-weight: 800;
-            line-height: 1.05;
-            letter-spacing: -2px;
-            margin-bottom: 16px;
-        }
-
-        .header h1 .accent { color: var(--accent); }
-        .header h1 .stroke {
-            -webkit-text-stroke: 1px rgba(240,242,248,0.4);
-            color: transparent;
-        }
-
-        .header p {
-            font-size: 15px;
-            color: var(--muted);
-            font-weight: 300;
-            max-width: 440px;
-            margin: 0 auto;
-            line-height: 1.7;
-        }
-
-        /* ── Avatar Ring ── */
-        .avatar-ring {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            margin: 0 auto 24px;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-        }
-
-        .avatar-ring::before {
-            content: '';
-            position: absolute;
-            inset: -3px;
-            border-radius: 50%;
-            background: conic-gradient(var(--accent), var(--accent2), var(--accent3), var(--accent));
-            animation: spin 4s linear infinite;
-            z-index: -1;
-        }
-
-        .avatar-ring::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 50%;
-            background: var(--surface);
-            z-index: -1;
-        }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* ── Cards ── */
-        .card-section {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 32px;
-            margin-bottom: 20px;
-            transition: border-color 0.3s ease;
-            animation: fadeUp 0.8s ease both;
-        }
-
-        .card-section:hover { border-color: rgba(232,255,71,0.15); }
-
-        .card-section:nth-child(2) { animation-delay: 0.1s; }
-        .card-section:nth-child(3) { animation-delay: 0.2s; }
-        .card-section:nth-child(4) { animation-delay: 0.3s; }
-
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(24px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
-        /* ── Section Header ── */
-        .section-label {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 24px;
-        }
-
-        .section-label .icon-wrap {
-            width: 34px;
-            height: 34px;
-            border-radius: 10px;
-            background: rgba(232,255,71,0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 15px;
-            color: var(--accent);
-            flex-shrink: 0;
-        }
-
-        .section-label h3 {
-            font-family: var(--font-display);
-            font-size: 15px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            color: var(--text);
-        }
-
-        .section-label p {
-            font-size: 12px;
-            color: var(--muted);
-            font-weight: 300;
-        }
-
-        /* ── Form Grid ── */
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-
-        .form-grid .full { grid-column: 1 / -1; }
-
-        .field-group { display: flex; flex-direction: column; gap: 6px; }
-
-        .field-label {
-            font-size: 11px;
-            font-weight: 500;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            color: var(--muted);
-        }
-
-        .field-input,
-        .field-select,
-        .field-textarea {
-            background: var(--surface2);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            color: var(--text);
-            font-family: var(--font-body);
-            font-size: 14px;
-            padding: 12px 16px;
-            width: 100%;
-            outline: none;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-            -webkit-appearance: none;
-        }
-
-        .field-select {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236b7594' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 16px center;
-            padding-right: 40px;
-            cursor: pointer;
-        }
-
-        .field-select option { background: #161b27; color: #f0f2f8; }
-
-        .field-textarea { resize: vertical; min-height: 90px; }
-
-        .field-input:focus,
-        .field-select:focus,
-        .field-textarea:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(232,255,71,0.1);
-            background: var(--surface3);
-        }
-
-        .field-input::placeholder,
-        .field-textarea::placeholder { color: var(--muted); opacity: 0.6; }
-
-        /* ── Chip Tags for Quick Questions ── */
-        .question-chips {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-
-        .chip {
-            background: var(--surface2);
-            border: 1px solid var(--border);
-            border-radius: 100px;
-            padding: 7px 14px;
-            font-size: 12px;
-            color: var(--muted);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-            user-select: none;
-        }
-
-        .chip:hover {
-            background: rgba(232,255,71,0.08);
-            border-color: rgba(232,255,71,0.35);
-            color: var(--accent);
-        }
-
-        /* ── Buttons ── */
-        .btn-primary {
-            background: var(--accent);
-            color: #080a0f;
-            font-family: var(--font-display);
-            font-size: 14px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            border: none;
-            border-radius: 12px;
-            padding: 16px 32px;
-            width: 100%;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-primary::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
-            opacity: 0;
-            transition: opacity 0.25s;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 32px rgba(232,255,71,0.35);
-        }
-
-        .btn-primary:hover::before { opacity: 1; }
-        .btn-primary:active { transform: translateY(0); }
-
-        .btn-primary.loading {
-            pointer-events: none;
-            background: #3d4a00;
-            color: var(--accent);
-        }
-
-        .btn-secondary {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--muted);
-            font-family: var(--font-display);
-            font-size: 13px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            border-radius: 12px;
-            padding: 12px 24px;
-            width: 100%;
-            cursor: pointer;
-            transition: all 0.25s ease;
-        }
-
-        .btn-secondary:hover {
-            border-color: rgba(255,255,255,0.2);
-            color: var(--text);
-            background: var(--surface2);
-        }
-
-        .btn-row { display: flex; gap: 12px; }
-
-        /* ── Prediction Output ── */
-        .output-card {
-            background: linear-gradient(135deg, rgba(232,255,71,0.04), rgba(71,255,232,0.04));
-            border: 1px solid rgba(232,255,71,0.2);
-            border-radius: 20px;
-            padding: 28px;
-            position: relative;
-            overflow: hidden;
-            margin-top: 20px;
-            animation: fadeUp 0.5s ease both;
-        }
-
-        .output-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
-            border-radius: 20px 20px 0 0;
-        }
-
-        .output-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-
-        .output-tag {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 11px;
-            font-weight: 500;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            color: var(--accent);
-        }
-
-        .output-tag .blink {
-            width: 6px;
-            height: 6px;
-            background: var(--accent);
-            border-radius: 50%;
-            animation: pulse 1s ease-in-out infinite;
-        }
-
-        .copy-btn {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 6px 12px;
-            font-size: 12px;
-            color: var(--muted);
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .copy-btn:hover { background: rgba(255,255,255,0.08); color: var(--text); }
-
-        .output-text {
-            font-size: 17px;
-            font-weight: 300;
-            line-height: 1.8;
-            color: var(--text);
-            font-style: italic;
-        }
-
-        .output-meta {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            margin-top: 20px;
-            padding-top: 16px;
-            border-top: 1px solid var(--border);
-        }
-
-        .meta-chip {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 11px;
-            color: var(--muted);
-        }
-
-        .meta-chip i { font-size: 12px; }
-
-        /* ── Stats Row ── */
-        .stats-row {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .stat-box {
-            background: var(--surface2);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 16px;
-            text-align: center;
-            transition: border-color 0.2s;
-        }
-
-        .stat-box:hover { border-color: rgba(232,255,71,0.2); }
-
-        .stat-num {
-            font-family: var(--font-display);
-            font-size: 24px;
-            font-weight: 800;
-            color: var(--accent);
-            line-height: 1;
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            font-size: 11px;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* ── History Timeline ── */
-        .history-list { display: flex; flex-direction: column; gap: 12px; }
-
-        .history-item {
-            display: flex;
-            gap: 14px;
-            padding: 14px 16px;
-            background: var(--surface2);
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            align-items: flex-start;
-            transition: border-color 0.2s;
-        }
-
-        .history-item:hover { border-color: rgba(232,255,71,0.15); }
-
-        .history-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--accent2);
-            flex-shrink: 0;
-            margin-top: 5px;
-        }
-
-        .history-scenario { font-size: 13px; color: var(--muted); margin-bottom: 4px; }
-        .history-choice { font-size: 14px; color: var(--text); font-weight: 400; }
-        .history-time { font-size: 11px; color: var(--muted); margin-top: 4px; }
-
-        /* ── Mood Selector ── */
-        .mood-row {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-top: 8px;
-        }
-
-        .mood-pill {
-            padding: 8px 16px;
-            border-radius: 100px;
-            background: var(--surface2);
-            border: 1px solid var(--border);
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.2s;
-            user-select: none;
-        }
-
-        .mood-pill:hover,
-        .mood-pill.active {
-            background: rgba(232,255,71,0.08);
-            border-color: rgba(232,255,71,0.3);
-            color: var(--accent);
-        }
-
-        /* ── Scenario Scenarios Textarea ── */
-        .scenario-wrap { position: relative; }
-        .char-counter {
-            position: absolute;
-            bottom: 12px;
-            right: 14px;
-            font-size: 11px;
-            color: var(--muted);
-            pointer-events: none;
-        }
-
-        /* ── Loading Spinner ── */
-        @keyframes rotateSpin {
-            to { transform: rotate(360deg); }
-        }
-
-        .spinner {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(8,10,15,0.4);
-            border-top-color: #080a0f;
-            border-radius: 50%;
-            animation: rotateSpin 0.7s linear infinite;
-            vertical-align: middle;
-            margin-right: 8px;
-        }
-
-        /* ── Divider ── */
-        .divider {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            margin: 28px 0;
-            color: var(--muted);
-            font-size: 11px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-        .divider::before, .divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: var(--border);
-        }
-
-        /* ── Toggle Switch ── */
-        .toggle-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .toggle-row:last-child { border-bottom: none; }
-
-        .toggle-info h4 {
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text);
-            margin-bottom: 2px;
-        }
-        .toggle-info p { font-size: 11px; color: var(--muted); }
-
-        .toggle {
-            position: relative;
-            width: 44px;
-            height: 24px;
-            flex-shrink: 0;
-        }
-        .toggle input { opacity: 0; width: 0; height: 0; }
-        .toggle-slider {
-            position: absolute;
-            inset: 0;
-            background: var(--surface3);
-            border: 1px solid var(--border);
-            border-radius: 100px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .toggle-slider::before {
-            content: '';
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            left: 3px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: var(--muted);
-            border-radius: 50%;
-            transition: 0.3s;
-        }
-        .toggle input:checked + .toggle-slider { background: rgba(232,255,71,0.15); border-color: rgba(232,255,71,0.3); }
-        .toggle input:checked + .toggle-slider::before { left: 23px; background: var(--accent); }
-
-        /* ── Responsive ── */
-        @media (max-width: 600px) {
-            .form-grid { grid-template-columns: 1fr; }
-            .stats-row { grid-template-columns: 1fr 1fr; }
-            .btn-row { flex-direction: column; }
-            .mood-row { gap: 6px; }
-            .card-section { padding: 20px; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digital Twin — AI Doppelganger</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0b0f;
+  --surface: #111318;
+  --surface2: #181c24;
+  --surface3: #1e2330;
+  --accent: #c8f135;
+  --accent-dim: rgba(200,241,53,0.12);
+  --accent2: #35f1c8;
+  --accent3: #f17035;
+  --text: #eef0f8;
+  --text-muted: #5a6280;
+  --text-mid: #8892b0;
+  --border: rgba(255,255,255,0.07);
+  --border-hover: rgba(200,241,53,0.25);
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-full: 999px;
+  --font: 'Space Grotesk', sans-serif;
+  --font-serif: 'Instrument Serif', serif;
+  --transition: 0.2s ease;
+}
+
+[data-theme="light"] {
+  --bg: #f4f5f0;
+  --surface: #ffffff;
+  --surface2: #f0f1ec;
+  --surface3: #e8e9e4;
+  --accent: #4a7c00;
+  --accent-dim: rgba(74,124,0,0.1);
+  --accent2: #007a65;
+  --accent3: #c84a00;
+  --text: #1a1c22;
+  --text-muted: #9098a8;
+  --text-mid: #505870;
+  --border: rgba(0,0,0,0.08);
+  --border-hover: rgba(74,124,0,0.3);
+  --shadow: 0 4px 24px rgba(0,0,0,0.08);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background var(--transition), color var(--transition);
+}
+
+/* Grid BG — only dark mode */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(200,241,53,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(200,241,53,0.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 1;
+  transition: opacity var(--transition);
+}
+[data-theme="light"] body::before { opacity: 0; }
+
+/* Subtle orb */
+.orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(90px);
+  pointer-events: none;
+  z-index: 0;
+  transition: opacity var(--transition);
+}
+.orb-1 { width: 420px; height: 420px; background: #c8f135; top: -160px; left: -120px; opacity: 0.07; }
+.orb-2 { width: 320px; height: 320px; background: #35f1c8; bottom: -120px; right: -80px; opacity: 0.06; }
+[data-theme="light"] .orb { opacity: 0 !important; }
+
+/* ── Layout ── */
+.wrapper {
+  position: relative;
+  z-index: 1;
+  max-width: 840px;
+  margin: 0 auto;
+  padding: 40px 20px 80px;
+}
+
+/* ── Topbar ── */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 48px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--accent-dim);
+  border: 1px solid var(--border-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+}
+
+.brand-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.3px;
+}
+
+.brand-tag {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.theme-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  color: var(--text-mid);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+}
+.theme-btn:hover { border-color: var(--border-hover); color: var(--text); }
+
+.status-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  padding: 6px 14px;
+  font-size: 12px;
+  color: var(--text-mid);
+  font-weight: 500;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: blink 2s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* ── Hero ── */
+.hero {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.hero h1 {
+  font-size: clamp(32px, 6vw, 62px);
+  font-weight: 700;
+  letter-spacing: -2px;
+  line-height: 1.05;
+  margin-bottom: 14px;
+}
+
+.hero h1 em {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--accent);
+  letter-spacing: -1px;
+}
+
+.hero p {
+  font-size: 15px;
+  color: var(--text-muted);
+  font-weight: 400;
+  max-width: 400px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* ── Stats ── */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px 14px;
+  text-align: center;
+  transition: border-color var(--transition);
+}
+.stat-card:hover { border-color: var(--border-hover); }
+
+.stat-num {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: -1px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  font-weight: 500;
+}
+
+/* ── Card ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+  margin-bottom: 16px;
+  transition: border-color var(--transition), background var(--transition);
+}
+
+.card:hover { border-color: rgba(255,255,255,0.1); }
+
+/* ── Section Header ── */
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--accent-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.section-icon.teal { background: rgba(53,241,200,0.1); }
+.section-icon.orange { background: rgba(241,112,53,0.1); }
+
+.section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.section-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+/* ── Form ── */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.form-grid .full { grid-column: 1 / -1; }
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+
+.field-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.field-input,
+.field-select,
+.field-textarea {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  padding: 11px 14px;
+  width: 100%;
+  outline: none;
+  transition: border-color var(--transition), background var(--transition);
+  -webkit-appearance: none;
+}
+
+.field-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%235a6280' d='M5 6L0 0h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+  cursor: pointer;
+}
+
+.field-select option { background: #181c24; color: #eef0f8; }
+[data-theme="light"] .field-select option { background: #fff; color: #1a1c22; }
+
+.field-textarea {
+  resize: vertical;
+  min-height: 90px;
+  line-height: 1.6;
+}
+
+.field-input:focus,
+.field-select:focus,
+.field-textarea:focus {
+  border-color: var(--border-hover);
+  background: var(--surface3);
+}
+
+.field-input::placeholder,
+.field-textarea::placeholder { color: var(--text-muted); opacity: 0.7; }
+
+/* ── Divider ── */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 22px 0;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.divider::before, .divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── Toggle ── */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.toggle-row:last-of-type { border-bottom: none; }
+
+.toggle-info h4 {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+.toggle-info p { font-size: 11px; color: var(--text-muted); }
+
+.toggle {
+  position: relative;
+  width: 42px;
+  height: 22px;
+  flex-shrink: 0;
+}
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: 0.25s;
+}
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  left: 3px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--text-muted);
+  border-radius: 50%;
+  transition: 0.25s;
+}
+.toggle input:checked + .toggle-slider { background: var(--accent-dim); border-color: var(--border-hover); }
+.toggle input:checked + .toggle-slider::before { left: 23px; background: var(--accent); }
+
+/* ── Buttons ── */
+.btn-primary {
+  background: var(--accent);
+  color: #0a0b0f;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 13px 24px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0); opacity: 1; }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-mid);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  padding: 11px 20px;
+  cursor: pointer;
+  transition: all var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-secondary:hover { border-color: var(--border-hover); color: var(--text); background: var(--accent-dim); }
+
+.btn-icon {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-mid);
+  border-radius: var(--radius-sm);
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 15px;
+  transition: all var(--transition);
+}
+.btn-icon:hover { border-color: var(--border-hover); color: var(--text); }
+
+.btn-row { display: flex; gap: 10px; align-items: center; }
+
+/* ── Chat / Predict section ── */
+.chat-area {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Chips */
+.chips-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.chip {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  padding: 6px 12px;
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  user-select: none;
+  font-family: var(--font);
+}
+.chip:hover {
+  background: var(--accent-dim);
+  border-color: var(--border-hover);
+  color: var(--accent);
+}
+.chip.active {
+  background: var(--accent-dim);
+  border-color: var(--border-hover);
+  color: var(--accent);
+}
+
+/* Mood pills */
+.mood-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.mood-pill {
+  padding: 7px 14px;
+  border-radius: var(--radius-full);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  user-select: none;
+  font-family: var(--font);
+  color: var(--text-mid);
+}
+.mood-pill:hover, .mood-pill.active {
+  background: var(--accent-dim);
+  border-color: var(--border-hover);
+  color: var(--accent);
+}
+
+/* Textarea with counter */
+.textarea-wrap { position: relative; }
+.char-count {
+  position: absolute;
+  bottom: 10px;
+  right: 12px;
+  font-size: 11px;
+  color: var(--text-muted);
+  pointer-events: none;
+  background: var(--surface2);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* ── Output Card ── */
+.output-card {
+  background: var(--surface2);
+  border: 1px solid var(--border-hover);
+  border-radius: var(--radius);
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  margin-top: 16px;
+}
+
+.output-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  opacity: 0.6;
+}
+
+.output-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.output-tag {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.output-text {
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-style: italic;
+  line-height: 1.75;
+  color: var(--text);
+}
+
+.output-footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.meta-item {
+  font-size: 11px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Typing animation */
+.typing-indicator {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  padding: 4px 0;
+}
+.typing-indicator span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.4;
+  animation: typingBounce 1.2s ease-in-out infinite;
+}
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingBounce {
+  0%, 100% { opacity: 0.4; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(-4px); }
+}
+
+/* Reaction buttons */
+.reaction-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+/* Copy btn */
+.copy-btn {
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-size: 11px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition);
+  font-family: var(--font);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.copy-btn:hover { color: var(--text); border-color: var(--border-hover); }
+
+/* ── History ── */
+.history-list { display: flex; flex-direction: column; gap: 10px; }
+
+.history-item {
+  display: flex;
+  gap: 12px;
+  padding: 14px;
+  background: var(--surface2);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  align-items: flex-start;
+  transition: border-color var(--transition);
+}
+.history-item:hover { border-color: var(--border-hover); }
+
+.h-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent2);
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+.h-scenario { font-size: 12px; color: var(--text-muted); margin-bottom: 3px; }
+.h-choice { font-size: 13px; color: var(--text); font-weight: 500; }
+.h-time { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+
+/* ── Fade Up Anim ── */
+.fade-up {
+  animation: fadeUp 0.6s ease both;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fade-up:nth-child(2) { animation-delay: 0.08s; }
+.fade-up:nth-child(3) { animation-delay: 0.16s; }
+.fade-up:nth-child(4) { animation-delay: 0.24s; }
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .stats-row { grid-template-columns: 1fr 1fr; }
+  .btn-row { flex-wrap: wrap; }
+  .card { padding: 20px; }
+  .topbar { gap: 8px; }
+  .brand-name { display: none; }
+}
+</style>
 </head>
 <body>
 
-    <!-- Background FX -->
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-    <div class="orb orb-3"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
 
-    <div class="wrapper">
+<div class="wrapper">
 
-        <!-- ── Header ── -->
-        <div class="header">
-            <div class="avatar-ring">🧠</div>
-            <div class="header-badge">
-                <span class="dot"></span>
-                AI-Powered · Live
-            </div>
-            <h1>
-                Your <span class="accent">Digital</span><br>
-                <span class="stroke">Twin.</span>
-            </h1>
-            <p>Ek AI jo exactly tere jaisa sochta hai — tere moods, habits, aur vibes ke basis pe predict karta hai tu kya karega.</p>
+  <!-- ── Topbar ── -->
+  <div class="topbar fade-up">
+    <div class="brand">
+      <div class="brand-icon">🧠</div>
+      <div>
+        <div class="brand-name">Digital Twin</div>
+        <div class="brand-tag">AI Doppelganger</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="status-pill">
+        <span class="status-dot"></span>
+        Live
+      </div>
+      <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle theme">
+        <span id="themeIcon">☀️</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Hero ── -->
+  <div class="hero fade-up">
+    <h1>Tera<br><em>Digital Twin.</em></h1>
+    <p>Tere moods, habits, aur vibes ke basis pe predict karta hai — tu kya karega.</p>
+  </div>
+
+  <!-- ── Stats ── -->
+  <div class="stats-row fade-up">
+    <div class="stat-card">
+      <div class="stat-num" id="stat-predictions">0</div>
+      <div class="stat-label">Predictions</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-accuracy">94%</div>
+      <div class="stat-label">Accuracy</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-streak">0</div>
+      <div class="stat-label">Streak</div>
+    </div>
+  </div>
+
+  <!-- ── Section 1: Configure ── -->
+  <div class="card fade-up">
+    <div class="section-head">
+      <div class="section-icon">👤</div>
+      <div>
+        <div class="section-title">Apna Twin Configure Karo</div>
+        <div class="section-sub">Personality, habits aur vibes — taaki AI teri tarah soch sake</div>
+      </div>
+    </div>
+
+    <form id="prefForm" onsubmit="handlePrefSubmit(event)">
+      <div class="form-grid">
+
+        <div class="field">
+          <label class="field-label">Tera Naam</label>
+          <input type="text" name="name" class="field-input" placeholder="e.g. Arjun, Priya…">
         </div>
 
-        <!-- ── Stats ── -->
-        <div class="stats-row" style="animation: fadeUp 0.8s 0.05s ease both; opacity: 0;">
-            <div class="stat-box">
-                <div class="stat-num">{{ total_predictions|default:"0" }}</div>
-                <div class="stat-label">Predictions</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-num">{{ accuracy_score|default:"94" }}%</div>
-                <div class="stat-label">Accuracy</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-num">{{ streak|default:"0" }}</div>
-                <div class="stat-label">Day Streak</div>
-            </div>
+        <div class="field">
+          <label class="field-label">Neend ka scene</label>
+          <select name="sleep_cycle" class="field-select">
+            <option value="early_bird">🌅 Early Bird (6am)</option>
+            <option value="normal">☀️ Normal (10am tak)</option>
+            <option value="night_owl" selected>🦉 Night Owl (3am tak)</option>
+            <option value="chaotic">💀 Kuch fix nahi</option>
+          </select>
         </div>
 
-        <!-- ── Section 1: Identity Setup ── -->
-        <div class="card-section">
-            <div class="section-label">
-                <div class="icon-wrap"><i class="bi bi-person-badge"></i></div>
-                <div>
-                    <h3>Apna Twin Configure Karo</h3>
-                    <p>Teri personality, habits aur vibes — taaki AI teri tarah soch sake</p>
-                </div>
-            </div>
-
-            <form method="POST" id="prefForm">
-                {% csrf_token %}
-
-                <div class="form-grid">
-
-                    <div class="field-group">
-                        <label class="field-label">Tera Naam</label>
-                        <input type="text" name="name" class="field-input" placeholder="e.g. Arjun, Priya..." value="{{ user.get_full_name|default:user.username }}">
-                    </div>
-
-                    <div class="field-group">
-                        <label class="field-label">Neend ka scene kya hai?</label>
-                        <select name="sleep_cycle" class="field-select">
-                            <option value="early_bird" {% if pref.sleep_cycle == 'early_bird' %}selected{% endif %}>🌅 Early Bird (6am waala)</option>
-                            <option value="normal" {% if pref.sleep_cycle == 'normal' %}selected{% endif %}>☀️ Normal (10am tak)</option>
-                            <option value="night_owl" {% if pref.sleep_cycle == 'night_owl' %}selected{% endif %}>🦉 Night Owl (3am tak)</option>
-                            <option value="chaotic" {% if pref.sleep_cycle == 'chaotic' %}selected{% endif %}>💀 Kuch fix nahi bhai</option>
-                        </select>
-                    </div>
-
-                    <div class="field-group">
-                        <label class="field-label">Khaana-peena kya scene hai?</label>
-                        <select name="diet_preference" class="field-select">
-                            <option value="veg" {% if pref.diet_preference == 'veg' %}selected{% endif %}>🌿 Pure Veg</option>
-                            <option value="nonveg" {% if pref.diet_preference == 'nonveg' %}selected{% endif %}>🍗 Non-Veg (kuch bhi)</option>
-                            <option value="junk_lover" {% if pref.diet_preference == 'junk_lover' %}selected{% endif %}>🍕 Junk Food Addict</option>
-                            <option value="bhai_kuch_bhi" {% if pref.diet_preference == 'bhai_kuch_bhi' %}selected{% endif %}>😐 Jo milega kha lunga</option>
-                        </select>
-                    </div>
-
-                    <div class="field-group">
-                        <label class="field-label">Energy Level Generally</label>
-                        <select name="energy_level" class="field-select">
-                            <option value="high" {% if pref.energy_level == 'high' %}selected{% endif %}>⚡ High — Hamesha ready</option>
-                            <option value="medium" {% if pref.energy_level == 'medium' %}selected{% endif %}>🔋 Medium — Depends karta</option>
-                            <option value="lazy" {% if pref.energy_level == 'lazy' %}selected{% endif %}>😴 Lazy — Bed best friend</option>
-                        </select>
-                    </div>
-
-                    <div class="field-group full">
-                        <label class="field-label">Teri Personality & Hobbies (detailed bata)</label>
-                        <textarea name="personality_traits" class="field-textarea" placeholder="e.g. Introvert hoon, coding aur gaming karta hoon, tech mein interested hoon, procrastinator bhi hoon, chai addict...">{{ pref.personality_traits }}</textarea>
-                    </div>
-
-                    <div class="field-group full">
-                        <label class="field-label">Life Abhi Kaisi Chal Rahi Hai?</label>
-                        <select name="life_phase" class="field-select">
-                            <option value="student">📚 Student hoon — padhai pressure mein</option>
-                            <option value="job_seeker">🎯 Job dhundh raha hoon</option>
-                            <option value="working">💼 Job mein hoon</option>
-                            <option value="freelancer">💻 Freelancer / Startup</option>
-                            <option value="gap_year">🌴 Chill mode on hai abhi</option>
-                        </select>
-                    </div>
-
-                </div>
-
-                <div class="divider">Settings</div>
-
-                <div class="toggle-row">
-                    <div class="toggle-info">
-                        <h4>Brutal Honest Mode</h4>
-                        <p>AI sugar-coat nahi karega — seedha bolega</p>
-                    </div>
-                    <label class="toggle">
-                        <input type="checkbox" name="brutal_mode" {% if pref.brutal_mode %}checked{% endif %}>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-
-                <div class="toggle-row">
-                    <div class="toggle-info">
-                        <h4>Night Mode Personality</h4>
-                        <p>Raat ke time alag vibes de — jaise actually hota hai</p>
-                    </div>
-                    <label class="toggle">
-                        <input type="checkbox" name="night_mode_personality" {% if pref.night_mode_personality %}checked{% endif %}>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-
-                <div class="toggle-row">
-                    <div class="toggle-info">
-                        <h4>Past Choices Se Seekhna</h4>
-                        <p>AI teri purani choices se pattern dhundhe</p>
-                    </div>
-                    <label class="toggle">
-                        <input type="checkbox" name="learn_from_history" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-
-                <div style="margin-top: 24px;">
-                    <button type="submit" name="update_pref" class="btn-secondary">
-                        <i class="bi bi-save2"></i>&nbsp; Preferences Save Karo
-                    </button>
-                </div>
-
-            </form>
+        <div class="field">
+          <label class="field-label">Khaana-peena</label>
+          <select name="diet_preference" class="field-select">
+            <option value="veg">🌿 Pure Veg</option>
+            <option value="nonveg" selected>🍗 Non-Veg</option>
+            <option value="junk_lover">🍕 Junk Food Addict</option>
+            <option value="bhai_kuch_bhi">😐 Jo milega</option>
+          </select>
         </div>
 
-        <!-- ── Section 2: Prediction Engine ── -->
-        <div class="card-section">
-            <div class="section-label">
-                <div class="icon-wrap" style="background: rgba(71,255,232,0.1); color: var(--accent2);"><i class="bi bi-lightning-charge-fill"></i></div>
-                <div>
-                    <h3>Predict Karo — Tu Kya Karega?</h3>
-                    <p>Situation batao, AI batayega tera exact reaction</p>
-                </div>
-            </div>
-
-            <!-- Quick Question Chips -->
-            <p class="field-label" style="margin-bottom: 10px;">Quick Scenarios:</p>
-            <div class="question-chips">
-                <div class="chip" onclick="fillScenario(this)">😴 Subah 7 baje alarm baja, meeting 9 baje hai</div>
-                <div class="chip" onclick="fillScenario(this)">🌧️ Sunday barish ho rahi, koi plan nahi</div>
-                <div class="chip" onclick="fillScenario(this)">💸 Mahine ke aakhir mein paise khatam</div>
-                <div class="chip" onclick="fillScenario(this)">📱 Dost ne party plan kiya, tu thaka hua</div>
-                <div class="chip" onclick="fillScenario(this)">🍕 Raat 2 baje bhook lagi, kitchen khali</div>
-                <div class="chip" onclick="fillScenario(this)">📚 Exam kal hai, aaj kuch nahi padha</div>
-                <div class="chip" onclick="fillScenario(this)">💼 Boss ne unexpectedly kaam diya weekend pe</div>
-                <div class="chip" onclick="fillScenario(this)">🎮 Assignment pending hai par nayi game aa gayi</div>
-            </div>
-
-            <!-- Mood Context -->
-            <div style="margin-bottom: 16px;">
-                <p class="field-label" style="margin-bottom: 8px;">Abhi mood kaisa hai?</p>
-                <div class="mood-row">
-                    <div class="mood-pill" onclick="selectMood(this)" data-mood="thaka">😫 Thaka</div>
-                    <div class="mood-pill" onclick="selectMood(this)" data-mood="chill">😎 Chill</div>
-                    <div class="mood-pill" onclick="selectMood(this)" data-mood="stressed">😤 Stressed</div>
-                    <div class="mood-pill" onclick="selectMood(this)" data-mood="motivated">🔥 Motivated</div>
-                    <div class="mood-pill" onclick="selectMood(this)" data-mood="bored">🥱 Bored</div>
-                    <div class="mood-pill" onclick="selectMood(this)" data-mood="hungry">🍔 Hungry</div>
-                </div>
-                <input type="hidden" name="current_mood" id="moodInput" value="">
-            </div>
-
-            <form method="POST" id="predForm">
-                {% csrf_token %}
-
-                <div class="field-group" style="margin-bottom: 16px;">
-                    <label class="field-label">Scenario / Situation</label>
-                    <div class="scenario-wrap">
-                        <textarea
-                            name="scenario"
-                            id="scenarioInput"
-                            class="field-textarea"
-                            placeholder="Jitna detail de sake, utna better prediction... e.g. Raat ke 11 baj rahe hain, kal presentation hai, kuch ready nahi, aur yaar log movie dekhne bula rahe hain..."
-                            maxlength="300"
-                            oninput="updateChar(this)"
-                            required
-                            style="min-height: 110px; padding-bottom: 30px;"
-                        ></textarea>
-                        <span class="char-counter" id="charCount">0 / 300</span>
-                    </div>
-                </div>
-
-                <div class="btn-row">
-                    <button type="submit" name="get_prediction" class="btn-primary" id="predictBtn" onclick="startLoading(this)">
-                        <i class="bi bi-stars"></i>&nbsp; Digital Twin Se Pucho
-                    </button>
-                    <button type="button" class="btn-secondary" style="flex: 0 0 auto; width: auto; padding: 16px 20px;" onclick="clearScenario()" title="Clear">
-                        <i class="bi bi-x-lg"></i>
-                    </button>
-                </div>
-
-            </form>
-
-            <!-- ── Output ── -->
-            {% if prediction %}
-            <div class="output-card" id="outputCard">
-                <div class="output-header">
-                    <div class="output-tag">
-                        <span class="blink"></span>
-                        Twin Response
-                    </div>
-                    <button class="copy-btn" onclick="copyPrediction()">
-                        <i class="bi bi-copy" id="copyIcon"></i>
-                        <span id="copyText">Copy</span>
-                    </button>
-                </div>
-
-                <p class="output-text" id="predictionText">{{ prediction }}</p>
-
-                <div class="output-meta">
-                    <div class="meta-chip"><i class="bi bi-cpu"></i> LLaMA 3.3-70B</div>
-                    <div class="meta-chip"><i class="bi bi-clock"></i> Just now</div>
-                    <div class="meta-chip" style="margin-left: auto;">
-                        <span style="color: var(--accent); font-size: 12px; cursor: pointer;" onclick="saveThisChoice()">
-                            <i class="bi bi-bookmark-plus"></i> Save Choice
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Reaction Buttons -->
-            <div style="display: flex; gap: 8px; margin-top: 12px; justify-content: center;">
-                <button class="mood-pill" onclick="react('accurate')">✅ Bilkul sahi</button>
-                <button class="mood-pill" onclick="react('close')">🤏 Kuch kuch sahi</button>
-                <button class="mood-pill" onclick="react('wrong')">❌ Nahi yaar, galat</button>
-            </div>
-            {% endif %}
+        <div class="field">
+          <label class="field-label">Energy Level</label>
+          <select name="energy_level" class="field-select">
+            <option value="high">⚡ High — Hamesha ready</option>
+            <option value="medium" selected>🔋 Medium — Depends</option>
+            <option value="lazy">😴 Lazy — Bed best friend</option>
+          </select>
         </div>
 
-        <!-- ── Section 3: Past Choices History ── -->
-        {% if past_choices %}
-        <div class="card-section" style="animation-delay: 0.3s;">
-            <div class="section-label">
-                <div class="icon-wrap" style="background: rgba(255,107,71,0.1); color: var(--accent3);"><i class="bi bi-clock-history"></i></div>
-                <div>
-                    <h3>Teri Past Choices</h3>
-                    <p>AI yahi dekh ke tujhe samajhta hai</p>
-                </div>
-            </div>
-
-            <div class="history-list">
-                {% for choice in past_choices %}
-                <div class="history-item">
-                    <div class="history-dot"></div>
-                    <div>
-                        <div class="history-scenario">{{ choice.scenario|truncatechars:70 }}</div>
-                        <div class="history-choice">→ {{ choice.choice_made }}</div>
-                        <div class="history-time">{{ choice.timestamp|timesince }} ago</div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
+        <div class="field full">
+          <label class="field-label">Personality & Hobbies</label>
+          <textarea name="personality_traits" class="field-textarea" placeholder="e.g. Introvert hoon, coding aur gaming karta hoon, tech mein interested hoon, procrastinator bhi hoon, chai addict…"></textarea>
         </div>
-        {% endif %}
 
-    </div><!-- /wrapper -->
+        <div class="field full">
+          <label class="field-label">Life Abhi</label>
+          <select name="life_phase" class="field-select">
+            <option value="student">📚 Student — padhai pressure mein</option>
+            <option value="job_seeker">🎯 Job dhundh raha hoon</option>
+            <option value="working">💼 Job mein hoon</option>
+            <option value="freelancer">💻 Freelancer / Startup</option>
+            <option value="gap_year">🌴 Chill mode on</option>
+          </select>
+        </div>
 
-    <script>
-        // ── Quick Scenario Chips ──
-        function fillScenario(el) {
-            const text = el.textContent.trim().replace(/^[^\s]+\s/, '');
-            const ta = document.getElementById('scenarioInput');
-            ta.value = text;
-            ta.focus();
-            updateChar(ta);
-            document.querySelectorAll('.chip').forEach(c => c.style.borderColor = '');
-            el.style.borderColor = 'rgba(232,255,71,0.4)';
-            el.style.color = 'var(--accent)';
+      </div>
+
+      <div class="divider">Settings</div>
+
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <h4>Brutal Honest Mode</h4>
+          <p>AI sugar-coat nahi karega — seedha bolega</p>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" name="brutal_mode" id="brutalMode">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <h4>Night Mode Personality</h4>
+          <p>Raat ke time alag vibes — jaise actually hota hai</p>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" name="night_mode_personality">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <h4>Past Choices Se Seekhna</h4>
+          <p>AI teri purani choices se pattern dhundhe</p>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" name="learn_from_history" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div style="margin-top: 20px;">
+        <button type="submit" class="btn-secondary">
+          <span>💾</span> Preferences Save Karo
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ── Section 2: Prediction ── -->
+  <div class="card fade-up">
+    <div class="section-head">
+      <div class="section-icon teal">⚡</div>
+      <div>
+        <div class="section-title">Predict Karo — Tu Kya Karega?</div>
+        <div class="section-sub">Situation batao, AI batayega tera exact reaction</div>
+      </div>
+    </div>
+
+    <div class="chat-area">
+
+      <!-- Scenario chips -->
+      <div>
+        <div class="chips-label">Quick Scenarios</div>
+        <div class="chips" id="chipsContainer">
+          <div class="chip" onclick="fillChip(this)">😴 Subah 7 baje alarm, meeting 9 baje</div>
+          <div class="chip" onclick="fillChip(this)">🌧️ Sunday barish, koi plan nahi</div>
+          <div class="chip" onclick="fillChip(this)">💸 Mahine end mein paise khatam</div>
+          <div class="chip" onclick="fillChip(this)">📱 Dost ne party bula, tu thaka</div>
+          <div class="chip" onclick="fillChip(this)">🍕 Raat 2 baje bhook, kitchen khali</div>
+          <div class="chip" onclick="fillChip(this)">📚 Exam kal, aaj kuch nahi padha</div>
+          <div class="chip" onclick="fillChip(this)">💼 Boss ne weekend kaam diya</div>
+          <div class="chip" onclick="fillChip(this)">🎮 Assignment pending, game launch ho gayi</div>
+        </div>
+      </div>
+
+      <!-- Mood -->
+      <div>
+        <div class="chips-label" style="margin-bottom: 8px;">Abhi mood kaisa hai?</div>
+        <div class="mood-row">
+          <div class="mood-pill" onclick="selectMood(this)" data-mood="thaka">😫 Thaka</div>
+          <div class="mood-pill" onclick="selectMood(this)" data-mood="chill">😎 Chill</div>
+          <div class="mood-pill" onclick="selectMood(this)" data-mood="stressed">😤 Stressed</div>
+          <div class="mood-pill" onclick="selectMood(this)" data-mood="motivated">🔥 Motivated</div>
+          <div class="mood-pill" onclick="selectMood(this)" data-mood="bored">🥱 Bored</div>
+          <div class="mood-pill" onclick="selectMood(this)" data-mood="hungry">🍔 Hungry</div>
+        </div>
+        <input type="hidden" id="moodInput" value="">
+      </div>
+
+      <!-- Scenario input -->
+      <div>
+        <div class="chips-label" style="margin-bottom: 6px;">Scenario / Situation</div>
+        <div class="textarea-wrap">
+          <textarea
+            id="scenarioInput"
+            class="field-textarea"
+            placeholder="Jitna detail de sake, utna better… e.g. Raat ke 11 baj rahe hain, kal presentation hai, kuch ready nahi, aur yaar log movie dekhne bula rahe hain…"
+            maxlength="300"
+            oninput="updateChar(this)"
+            style="min-height: 110px; padding-bottom: 28px;"
+          ></textarea>
+          <span class="char-count" id="charCount">0 / 300</span>
+        </div>
+        <p style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">
+          💡 Shift+Enter se new line, Enter se prediction bhejo
+        </p>
+      </div>
+
+      <!-- Buttons -->
+      <div class="btn-row">
+        <button class="btn-primary" id="predictBtn" onclick="getPrediction()">
+          <span>✦</span> Digital Twin Se Pucho
+        </button>
+        <button class="btn-icon" onclick="clearAll()" title="Clear">✕</button>
+      </div>
+
+      <!-- Output Area -->
+      <div id="outputArea"></div>
+
+    </div>
+  </div>
+
+  <!-- ── Section 3: History (initially hidden) ── -->
+  <div class="card fade-up" id="historyCard" style="display: none;">
+    <div class="section-head">
+      <div class="section-icon orange">🕐</div>
+      <div>
+        <div class="section-title">Teri Past Choices</div>
+        <div class="section-sub">AI yahi dekh ke tujhe samajhta hai</div>
+      </div>
+    </div>
+    <div class="history-list" id="historyList"></div>
+  </div>
+
+</div>
+
+<script>
+// ── State ──
+let currentMood = '';
+let savedPrefs = {};
+let predictions = parseInt(localStorage.getItem('dt_predictions') || '0');
+let streak = parseInt(localStorage.getItem('dt_streak') || '0');
+let history = JSON.parse(localStorage.getItem('dt_history') || '[]');
+
+// ── Init ──
+document.addEventListener('DOMContentLoaded', () => {
+  animateStats();
+  loadPrefs();
+  renderHistory();
+  setupEnterKey();
+  const saved = localStorage.getItem('dt_theme');
+  if (saved === 'light') setTheme('light');
+});
+
+// ── Theme ──
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme');
+  setTheme(current === 'dark' ? 'light' : 'dark');
+}
+
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  document.getElementById('themeIcon').textContent = t === 'dark' ? '☀️' : '🌙';
+  localStorage.setItem('dt_theme', t);
+}
+
+// ── Stats animation ──
+function animateStats() {
+  animNum('stat-predictions', predictions);
+  animNum('stat-streak', streak);
+}
+
+function animNum(id, target) {
+  if (!target) return;
+  const el = document.getElementById(id);
+  let c = 0;
+  const step = Math.max(1, Math.ceil(target / 35));
+  const t = setInterval(() => {
+    c = Math.min(c + step, target);
+    el.textContent = c;
+    if (c >= target) clearInterval(t);
+  }, 30);
+}
+
+// ── Preferences ──
+function loadPrefs() {
+  const p = JSON.parse(localStorage.getItem('dt_prefs') || '{}');
+  savedPrefs = p;
+  if (p.name) document.querySelector('[name="name"]').value = p.name;
+  if (p.sleep_cycle) document.querySelector('[name="sleep_cycle"]').value = p.sleep_cycle;
+  if (p.diet_preference) document.querySelector('[name="diet_preference"]').value = p.diet_preference;
+  if (p.energy_level) document.querySelector('[name="energy_level"]').value = p.energy_level;
+  if (p.personality_traits) document.querySelector('[name="personality_traits"]').value = p.personality_traits;
+  if (p.life_phase) document.querySelector('[name="life_phase"]').value = p.life_phase;
+  if (p.brutal_mode) document.querySelector('[name="brutal_mode"]').checked = true;
+  if (p.night_mode_personality) document.querySelector('[name="night_mode_personality"]').checked = true;
+}
+
+function handlePrefSubmit(e) {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const p = {};
+  for (let [k, v] of fd.entries()) p[k] = v;
+  p.brutal_mode = document.getElementById('brutalMode').checked;
+  localStorage.setItem('dt_prefs', JSON.stringify(p));
+  savedPrefs = p;
+  showToast('Preferences saved!');
+}
+
+// ── Enter key: submit on Enter, newline on Shift+Enter ──
+function setupEnterKey() {
+  const ta = document.getElementById('scenarioInput');
+  ta.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (this.value.trim()) getPrediction();
+    }
+  });
+}
+
+// ── Chips ──
+function fillChip(el) {
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  const raw = el.textContent.trim();
+  const text = raw.replace(/^[\u{1F300}-\u{1FAD6}\u{1F600}-\u{1F64F}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]+\s*/u, '');
+  const ta = document.getElementById('scenarioInput');
+  ta.value = text;
+  ta.focus();
+  updateChar(ta);
+}
+
+// ── Char counter ──
+function updateChar(el) {
+  document.getElementById('charCount').textContent = el.value.length + ' / 300';
+}
+
+// ── Clear ──
+function clearAll() {
+  document.getElementById('scenarioInput').value = '';
+  document.getElementById('charCount').textContent = '0 / 300';
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.mood-pill').forEach(p => p.classList.remove('active'));
+  document.getElementById('moodInput').value = '';
+  currentMood = '';
+  document.getElementById('outputArea').innerHTML = '';
+}
+
+// ── Mood ──
+function selectMood(el) {
+  document.querySelectorAll('.mood-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  currentMood = el.dataset.mood;
+  document.getElementById('moodInput').value = currentMood;
+}
+// ── CSRF Token Function (Django ko security ke liye chahiye) ──
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
         }
+    }
+    return cookieValue;
+}
 
-        // ── Char Counter ──
-        function updateChar(el) {
-            document.getElementById('charCount').textContent = el.value.length + ' / 300';
-        }
+// ── Main Prediction (Updated for Django Backend) ──
+async function getPrediction() {
+  const scenario = document.getElementById('scenarioInput').value.trim();
+  if (!scenario) { showToast('Pehle scenario likho! ✍️'); return; }
 
-        // ── Clear ──
-        function clearScenario() {
-            document.getElementById('scenarioInput').value = '';
-            document.getElementById('charCount').textContent = '0 / 300';
-            document.querySelectorAll('.chip').forEach(c => {
-                c.style.borderColor = '';
-                c.style.color = '';
-            });
-        }
+  const btn = document.getElementById('predictBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="typing-indicator"><span></span><span></span><span></span></span> Twin soch raha hai…';
 
-        // ── Mood Selector ──
-        function selectMood(el) {
-            document.querySelectorAll('.mood-pill').forEach(p => p.classList.remove('active'));
-            el.classList.add('active');
-            document.getElementById('moodInput').value = el.dataset.mood;
-        }
+  showTyping();
 
-        // ── Loading State ──
-        function startLoading(btn) {
-            if (!document.getElementById('scenarioInput').value.trim()) return;
-            btn.innerHTML = '<span class="spinner"></span> Twin soch raha hai...';
-            btn.classList.add('loading');
-        }
+  try {
+    // Apne Django backend ko data bhej rahe hain
+    const formData = new FormData();
+    formData.append('scenario', scenario);
+    formData.append('get_prediction', 'true'); // Backend logic trigger karne ke liye
 
-        // ── Copy Prediction ──
-        function copyPrediction() {
-            const text = document.getElementById('predictionText').textContent;
-            navigator.clipboard.writeText(text).then(() => {
-                document.getElementById('copyIcon').className = 'bi bi-check2';
-                document.getElementById('copyText').textContent = 'Copied!';
-                setTimeout(() => {
-                    document.getElementById('copyIcon').className = 'bi bi-copy';
-                    document.getElementById('copyText').textContent = 'Copy';
-                }, 2000);
-            });
-        }
+    const res = await fetch('/', {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': getCookie('csrftoken'),
+        'X-Requested-With': 'XMLHttpRequest' // Django ko batane ke liye ki ye AJAX call hai
+      },
+      body: formData
+    });
 
-        // ── Reaction Feedback ──
-        function react(type) {
-            const messages = {
-                accurate: '🎯 Nice! Twin accurate tha.',
-                close:    '🤏 Okay, kaafi close tha.',
-                wrong:    '📝 Note kar liya — agle baar better karega.'
-            };
-            const row = document.querySelector('[onclick^="react"]').parentElement;
-            row.innerHTML = `<p style="text-align:center; color: var(--muted); font-size:13px;">${messages[type]}</p>`;
-        }
+    if (!res.ok) throw new Error('Backend error ' + res.status);
+    
+    // Django se aaya JSON response
+    const data = await res.json();
+    const text = data.prediction;
 
-        // ── Save Choice (UI feedback) ──
-        function saveThisChoice() {
-            event.target.closest('.meta-chip').innerHTML =
-                '<i class="bi bi-bookmark-check-fill" style="color:var(--accent)"></i> <span style="color:var(--accent)">Saved!</span>';
-        }
+    showOutput(text, scenario);
+    savePrediction(scenario, text);
 
-        // ── Animate stats on load ──
-        document.querySelectorAll('.stat-num').forEach(el => {
-            const target = parseInt(el.textContent) || 0;
-            if (!target) return;
-            let curr = 0;
-            const step = Math.ceil(target / 40);
-            const t = setInterval(() => {
-                curr = Math.min(curr + step, target);
-                el.textContent = el.textContent.includes('%') ? curr + '%' : curr;
-                if (curr >= target) clearInterval(t);
-            }, 30);
-        });
+  } catch (err) {
+    showError(err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span>✦</span> Digital Twin Se Pucho';
+  }
+}
+// ── Main Prediction ──
+// ── Main Prediction (Super Safe Django CSRF Version) ──
+async function getPrediction() {
+  const scenario = document.getElementById('scenarioInput').value.trim();
+  if (!scenario) { showToast('Pehle scenario likho! ✍️'); return; }
 
-        // Scroll output into view after form submit
-        {% if prediction %}
-        document.addEventListener('DOMContentLoaded', () => {
-            const card = document.getElementById('outputCard');
-            if (card) setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300);
-        });
-        {% endif %}
-    </script>
+  const btn = document.getElementById('predictBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="typing-indicator"><span></span><span></span><span></span></span> Twin soch raha hai…';
 
+  showTyping();
+
+  try {
+    const formData = new FormData();
+    formData.append('scenario', scenario);
+    formData.append('get_prediction', 'true');
+
+    // window.location.href se exact current URL par hit hoga
+    const res = await fetch(window.location.href, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': '{{ csrf_token }}', // Django direct token dega yahan
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: formData
+    });
+
+    if (!res.ok) throw new Error('Django Backend Error: ' + res.status);
+    
+    const data = await res.json();
+    const text = data.prediction;
+
+    showOutput(text, scenario);
+    savePrediction(scenario, text);
+
+  } catch (err) {
+    console.error("Fetch Error: ", err); // Browser console mein actual error dikhega
+    showError(err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span>✦</span> Digital Twin Se Pucho';
+  }
+}
+
+function buildPrompt(prefs, scenario) {
+  const name = prefs.name || 'User';
+  const sleep = prefs.sleep_cycle || 'night_owl';
+  const diet = prefs.diet_preference || 'nonveg';
+  const energy = prefs.energy_level || 'medium';
+  const personality = prefs.personality_traits || 'typical Indian young adult';
+  const life = prefs.life_phase || 'student';
+  const brutal = prefs.brutal_mode === true || prefs.brutal_mode === 'on';
+  const nightMode = prefs.night_mode_personality === true || prefs.night_mode_personality === 'on';
+  const hour = new Date().getHours();
+  const isNight = hour >= 22 || hour < 5;
+
+  let style = brutal
+    ? 'Bilkul seedha bol, no sugar-coating, dost jaisi baat kar thodi harsh tone ke saath.'
+    : 'Dost ki tarah baat kar, samajhdaar aur relatable tone.';
+
+  if (nightMode && isNight) style += ' Raat ka time hai toh thodi alag vibe — honest aur introspective.';
+
+  const moodCtx = currentMood ? `Abhi mood: ${currentMood}.` : '';
+
+  return `Tu ek AI digital twin hai jo exactly ${name} ki tarah sochta hai.
+
+Personality profile:
+- Neend: ${sleep}
+- Diet: ${diet}
+- Energy: ${energy}
+- Personality & hobbies: ${personality}
+- Life phase: ${life}
+${moodCtx}
+
+Communication style: ${style}
+
+Situation / Scenario:
+"${scenario}"
+
+Pehle first-person mein predict kar — exactly kya karega ${name} is situation mein. 2-4 sentences. Hindi-English mix theek hai (Hinglish). Phir ek line mein honest self-awareness add kar. Short, punchy, human.`;
+}
+
+function showTyping() {
+  document.getElementById('outputArea').innerHTML = `
+    <div class="output-card" style="animation: fadeUp 0.3s ease;">
+      <div class="output-header">
+        <div class="output-tag"><span class="status-dot"></span> Twin soch raha hai…</div>
+      </div>
+      <div class="typing-indicator" style="margin-top: 8px;">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  `;
+}
+
+function showOutput(text, scenario) {
+  const hour = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+  document.getElementById('outputArea').innerHTML = `
+    <div class="output-card" id="outCard" style="animation: fadeUp 0.4s ease;">
+      <div class="output-card-line"></div>
+      <div class="output-header">
+        <div class="output-tag"><span class="status-dot"></span> Twin Response</div>
+        <button class="copy-btn" onclick="copyText()">📋 Copy</button>
+      </div>
+      <p class="output-text" id="outText">${escapeHtml(text)}</p>
+      <div class="output-footer">
+        <span class="meta-item">🤖 claude-sonnet-4</span>
+        <span class="meta-item">🕐 ${hour}</span>
+        <span class="meta-item" style="margin-left: auto; cursor: pointer; color: var(--accent2);" onclick="bookmarkCurrent()">🔖 Save</span>
+      </div>
+    </div>
+    <div class="reaction-row">
+      <div class="mood-pill" onclick="reactTo('accurate', this)">✅ Bilkul sahi</div>
+      <div class="mood-pill" onclick="reactTo('close', this)">🤏 Kuch kuch sahi</div>
+      <div class="mood-pill" onclick="reactTo('wrong', this)">❌ Nahi yaar</div>
+    </div>
+  `;
+  document.getElementById('outCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function showError(msg) {
+  document.getElementById('outputArea').innerHTML = `
+    <div class="output-card" style="border-color: rgba(241,112,53,0.3);">
+      <p style="color: var(--accent3); font-size: 14px;">⚠️ Kuch hua nahi — ${msg}</p>
+      <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">API key check karo ya dobara try karo.</p>
+    </div>
+  `;
+}
+
+// ── Copy ──
+function copyText() {
+  const t = document.getElementById('outText');
+  if (!t) return;
+  navigator.clipboard.writeText(t.textContent).then(() => showToast('Copied! 📋'));
+}
+
+// ── Reaction ──
+function reactTo(type, el) {
+  document.querySelectorAll('.reaction-row .mood-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  const msgs = {
+    accurate: '🎯 Nice! Twin sahi tha.',
+    close: '🤏 Close tha, better karega.',
+    wrong: '📝 Noted — agle baar improve karega.'
+  };
+  setTimeout(() => showToast(msgs[type]), 100);
+}
+
+function bookmarkCurrent() {
+  showToast('Saved to history! 🔖');
+}
+
+// ── Save to localStorage history ──
+function savePrediction(scenario, prediction) {
+  predictions++;
+  localStorage.setItem('dt_predictions', predictions);
+  document.getElementById('stat-predictions').textContent = predictions;
+
+  const entry = { scenario, prediction, time: Date.now() };
+  history.unshift(entry);
+  if (history.length > 10) history.pop();
+  localStorage.setItem('dt_history', JSON.stringify(history));
+  renderHistory();
+}
+
+// ── Render history ──
+function renderHistory() {
+  if (!history.length) return;
+  const card = document.getElementById('historyCard');
+  const list = document.getElementById('historyList');
+  card.style.display = '';
+  list.innerHTML = history.slice(0, 5).map(h => `
+    <div class="history-item">
+      <div class="h-dot"></div>
+      <div>
+        <div class="h-scenario">${escapeHtml(h.scenario.substring(0, 70))}${h.scenario.length > 70 ? '…' : ''}</div>
+        <div class="h-choice">→ ${escapeHtml(h.prediction.substring(0, 80))}${h.prediction.length > 80 ? '…' : ''}</div>
+        <div class="h-time">${timeAgo(h.time)}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── Toast ──
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.style.cssText = `
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+    background: var(--surface); border: 1px solid var(--border-hover);
+    color: var(--text); font-family: var(--font); font-size: 13px; font-weight: 500;
+    padding: 10px 20px; border-radius: 999px; z-index: 9999;
+    animation: fadeUp 0.3s ease;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  `;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2400);
+}
+
+// ── Helpers ──
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function timeAgo(ts) {
+  const d = Date.now() - ts;
+  if (d < 60000) return 'just now';
+  if (d < 3600000) return Math.floor(d/60000) + ' min ago';
+  if (d < 86400000) return Math.floor(d/3600000) + ' hr ago';
+  return Math.floor(d/86400000) + ' days ago';
+}
+</script>
 </body>
 </html>

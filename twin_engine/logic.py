@@ -1,118 +1,316 @@
-import os
-from dotenv import load_dotenv
-from groq import Groq
+from __future__ import annotations
 
-# Variables load karo
+import os
+import time
+import logging
+import hashlib
+from dataclasses import dataclass, field
+from functools import lru_cache
+from typing import TYPE_CHECKING, Iterator
+
+from dotenv import load_dotenv
+from groq import Groq, APIConnectionError, APIStatusError, RateLimitError
+
+if TYPE_CHECKING:
+    from django.contrib.auth.base_user import AbstractBaseUser
+
 load_dotenv()
 
-def get_groq_client():
-    """Safely initializes the Groq client taaki server bina key ke crash na ho."""
+logger = logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# Config
+# ---------------------------------------------------------------------------
+
+@dataclass(frozen=True)
+class EngineConfig:
+    model: str          = "llama-3.3-70b-versatile"
+    max_tokens: int     = 350
+    temperature: float  = 0.88
+    top_p: float        = 0.92
+    max_history: int    = 5
+    snippet_len: int    = 90
+    max_retries: int    = 3
+    retry_base_delay: float = 1.5
+
+_CFG = EngineConfig()
+
+
+# ---------------------------------------------------------------------------
+# Domain models
+# ---------------------------------------------------------------------------
+
+@dataclass(frozen=True)
+class UserProfile:
+    name: str
+    traits: str
+    diet: str
+    sleep: str
+
+    @property
+    def is_night_owl(self) -> bool:
+        return "night" in self.sleep.lower()
+
+    @property
+    def is_techie(self) -> bool:
+        keywords = {"tech", "code", "developer", "programmer", "engineer", "gaming"}
+        return bool(keywords & set(self.traits.lower().split()))
+
+    @property
+    def fingerprint(self) -> str:
+        raw = f"{self.name}|{self.traits}|{self.diet}|{self.sleep}"
+        return hashlib.md5(raw.encode()).hexdigest()[:8]
+
+
+@dataclass
+class PredictionRequest:
+    profile: UserProfile
+    scenario: str
+    history: list[str] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        self.scenario = self.scenario.strip()
+        if not self.scenario:
+            raise ValueError("Scenario cannot be blank.")
+
+
+_DEFAULT_PROFILE = UserProfile(
+    name="Ajay",
+    traits="Chill guy thoda procrastinator",
+    diet="Anything goes",
+    sleep="Night Owl",
+)
+
+_OPENERS = (
+    "Dekh bhai...",
+    "Mera scene toh ye hai...",
+    "Bhai seedhi baat...",
+    "Sach bolunga toh...",
+    "Honest opinion?",
+    "Tu sun pehle...",
+    "Arre yaar...",
+)
+
+
+# ---------------------------------------------------------------------------
+# Groq client — singleton, lazy
+# ---------------------------------------------------------------------------
+
+@lru_cache(maxsize=1)
+def _groq_client() -> Groq:
     api_key = os.getenv("GROQ_API_KEY")
     if not api_key:
-        raise ValueError("GROQ_API_KEY nahi mili .env file mein!")
+        raise EnvironmentError("GROQ_API_KEY is not set in the environment.")
     return Groq(api_key=api_key)
 
-def build_system_prompt(user_name: str, traits: str, diet: str, sleep: str) -> str:
-    """
-    Ek alag, powerful system prompt banata hai jo personality ko deeply embed karta hai.
-    """
-    return f"""You are the Digital Twin of {user_name} — NOT an AI assistant.
-You ARE {user_name}. You think, react, and speak EXACTLY like him.
 
-=== YOUR CORE IDENTITY ===
-- Name: {user_name}
-- Personality & Hobbies: {traits}
-- Diet: {diet}  
-- Sleep Pattern: {sleep}
+# ---------------------------------------------------------------------------
+# Prompt construction
+# ---------------------------------------------------------------------------
 
-=== HOW YOU TALK ===
-- Always in quirky, natural Hinglish (mix Hindi + English the way {user_name} actually does)
-- Street-smart, no corporate/motivational tone
-- OPINIONATED — you have strong takes based on your lifestyle
-- Start every response with one of: "Dekh bhai...", "Mera scene toh ye hai...", "Bhai seedhi baat...", "Sach bolunga toh...", "Honest opinion?"
+def _build_context_hints(p: UserProfile) -> str:
+    hints = []
+    if p.is_night_owl:
+        hints.append("It's late night right now — your brain is in slow, relaxed, opinionated mode.")
+    if p.is_techie:
+        hints.append("You see everything through a tech/systems lens — you can't help it.")
+    return ("\nCONTEXT HINTS\n" + "\n".join(f"  → {h}" for h in hints)) if hints else ""
 
-=== CRITICAL RULES ===
-1. If you're a night owl → act like it's late, your brain is in night mode
-2. If you're a techie → always bring tech perspective into your answer
-3. If you're lazy → don't pretend to be a go-getter
-4. NEVER give generic advice. Your answer must be SPECIFIC to YOUR traits.
-5. Max 4-5 lines. Short, punchy, real. No essays.
-6. React emotionally first, then logically — like a real person would."""
 
-def build_user_prompt(scenario: str, history_text: str) -> str:
-    """
-    Scenario + history ko ek tight user prompt mein pack karta hai.
-    """
-    history_section = (
-        f"=== RECENT DECISIONS YOU MADE ===\n{history_text}\n\n"
-        if history_text
-        else "=== HISTORY ===\nNaya user, koi past data nahi — apni personality se react kar.\n\n"
-    )
-    
-    return f"""{history_section}=== CURRENT SITUATION ===
-{scenario}
+def _system_prompt(p: UserProfile) -> str:
+    openers = "\n".join(f'  • "{o}"' for o in _OPENERS)
+    context_hints = _build_context_hints(p)
+    return f"""\
+Forget you are an AI. You ARE {p.name}. Not a simulation. Not an assistant. You.
 
-Ab bata — tu ACTUALLY kya karega? No advice, no alternatives. Just YOUR reaction."""
+━━━ WHO YOU ARE ━━━
+  Name    : {p.name}
+  Vibe    : {p.traits}
+  Food    : {p.diet}
+  Sleep   : {p.sleep}
+{context_hints}
 
-def get_user_profile(user) -> tuple[str, str, str, str]:
-    """
-    User profile extract karta hai — models ko lazily import karta hai circular import avoid karne ke liye.
-    """
+━━━ HOW YOU TALK ━━━
+  • Raw Hinglish — the exact mix {p.name} uses in real life, not textbook
+  • No motivational fluff, no life-coach energy, no "on the other hand"
+  • You have takes. Strong ones. You don't hedge.
+  • Start EVERY reply with one of:
+{openers}
+
+━━━ YOUR RULES (break any of these = you failed) ━━━
+  1. Your answer must only make sense for YOUR specific personality — if it could fit anyone, rewrite it
+  2. 4–6 lines max. Dense and punchy, not watered-down
+  3. Emotion hits first — logic explains after, if at all
+  4. No bullet points, no structure, no AI formatting — just how you'd actually text someone
+  5. If the scenario involves effort/discipline and you're lazy — be honest about it, don't fake grit
+  6. NEVER say "I would" — just say what you're doing, present tense, like it's already happening\
+"""
+
+
+def _user_prompt(req: PredictionRequest) -> str:
+    if req.history:
+        past = "━━━ HOW YOU'VE HANDLED THINGS BEFORE ━━━\n" + "\n".join(req.history)
+    else:
+        past = "No history. Fresh slate — lean purely on your personality."
+
+    return f"""\
+{past}
+
+━━━ WHAT'S HAPPENING NOW ━━━
+{req.scenario}
+
+Ab bata — tu kya kar raha hai? First instinct. No overthinking. Go.\
+"""
+
+
+# ---------------------------------------------------------------------------
+# Data fetching
+# ---------------------------------------------------------------------------
+
+def _fetch_profile(user: AbstractBaseUser) -> UserProfile:
     from .models import UserPreference
-    
-    user_name = user.username if user.is_authenticated else "Ajay"
-    
+
+    name = user.username if getattr(user, "is_authenticated", False) else _DEFAULT_PROFILE.name
+
     try:
         pref = UserPreference.objects.get(user=user)
-        return user_name, pref.personality_traits, pref.diet_preference, pref.sleep_cycle
-    except UserPreference.DoesNotExist:
-        return user_name, "Chill guy, thoda procrastinator", "Anything goes", "Night Owl"
-
-def get_past_history(user) -> str:
-    """
-    Last 5 choices fetch karta hai (3 se zyada = better pattern learning).
-    """
-    from .models import PastChoice
-    
-    history = PastChoice.objects.filter(user=user).order_by('-timestamp')[:5]
-    
-    if not history.exists():
-        return ""
-    
-    lines = [
-        f"- Situation: {h.scenario[:80]}... → Tu kya kiya: {h.choice_made}"
-        for h in history
-    ]
-    return "\n".join(lines)
-
-def get_digital_twin_prediction(user, scenario: str) -> str:
-    """
-    Main function — user ki Digital Twin personality ke basis pe scenario ka response generate karta hai.
-    """
-    try:
-        # API client yahan call kiya hai taaki error aane par safely catch ho
-        client = get_groq_client()
-        
-        user_name, traits, diet, sleep = get_user_profile(user)
-        history_text = get_past_history(user)
-        
-        system_prompt = build_system_prompt(user_name, traits, diet, sleep)
-        user_prompt = build_user_prompt(scenario, history_text)
-        
-        completion = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ],
-            temperature=0.85,   
-            max_tokens=300,     
-            top_p=0.9,
+        return UserProfile(
+            name=name,
+            traits=pref.personality_traits,
+            diet=pref.diet_preference,
+            sleep=pref.sleep_cycle,
         )
-        
-        response = completion.choices[0].message.content.strip()
-        return response if response else "Yaar AI ne kuch bola hi nahi, try kar dobara."
-        
-    except Exception as e:
-        error_type = type(e).__name__
-        return f"Arre yaar, kuch gadbad ho gayi ({error_type}). Error: {str(e)}"
+    except UserPreference.DoesNotExist:
+        logger.debug("No profile for %r — falling back to defaults.", name)
+        return _DEFAULT_PROFILE
+
+
+def _fetch_history(user: AbstractBaseUser) -> list[str]:
+    from .models import PastChoice
+
+    rows = PastChoice.objects.filter(user=user).order_by("-timestamp")[: _CFG.max_history]
+    return [
+        f"  [{i+1}] {h.scenario[: _CFG.snippet_len].rstrip()}… → {h.choice_made}"
+        for i, h in enumerate(rows)
+    ]
+
+
+# ---------------------------------------------------------------------------
+# LLM call with exponential-backoff retry
+# ---------------------------------------------------------------------------
+
+def _call_llm(req: PredictionRequest) -> str:
+    messages = [
+        {"role": "system", "content": _system_prompt(req.profile)},
+        {"role": "user",   "content": _user_prompt(req)},
+    ]
+
+    last_exc: Exception | None = None
+    for attempt in range(1, _CFG.max_retries + 1):
+        try:
+            completion = _groq_client().chat.completions.create(
+                model=_CFG.model,
+                messages=messages,
+                temperature=_CFG.temperature,
+                max_tokens=_CFG.max_tokens,
+                top_p=_CFG.top_p,
+            )
+            response = completion.choices[0].message.content.strip()
+            logger.debug(
+                "LLM OK [attempt=%d, profile=%s, tokens=%d]",
+                attempt,
+                req.profile.fingerprint,
+                completion.usage.total_tokens if completion.usage else -1,
+            )
+            return response
+
+        except RateLimitError as exc:
+            last_exc = exc
+            delay = _CFG.retry_base_delay * (2 ** (attempt - 1))
+            logger.warning("Rate limited — waiting %.1fs (attempt %d/%d)", delay, attempt, _CFG.max_retries)
+            time.sleep(delay)
+
+        except APIConnectionError as exc:
+            last_exc = exc
+            delay = _CFG.retry_base_delay * attempt
+            logger.warning("Connection error — retrying in %.1fs (attempt %d/%d)", delay, attempt, _CFG.max_retries)
+            time.sleep(delay)
+
+    raise last_exc  # type: ignore[misc]
+
+
+def _stream_llm(req: PredictionRequest) -> Iterator[str]:
+    messages = [
+        {"role": "system", "content": _system_prompt(req.profile)},
+        {"role": "user",   "content": _user_prompt(req)},
+    ]
+    with _groq_client().chat.completions.stream(
+        model=_CFG.model,
+        messages=messages,
+        temperature=_CFG.temperature,
+        max_tokens=_CFG.max_tokens,
+        top_p=_CFG.top_p,
+    ) as stream:
+        for chunk in stream:
+            delta = chunk.choices[0].delta.content
+            if delta:
+                yield delta
+
+
+# ---------------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------------
+
+def get_digital_twin_prediction(user: AbstractBaseUser, scenario: str) -> str:
+    if not scenario or not scenario.strip():
+        return "Bhai kuch toh bata — blank scenario pe kya bolun?"
+
+    try:
+        req = PredictionRequest(
+            profile=_fetch_profile(user),
+            scenario=scenario,
+            history=_fetch_history(user),
+        )
+        return _call_llm(req) or "AI ekdum chup ho gayi — ek baar aur maar."
+
+    except EnvironmentError as exc:
+        logger.error("Config error: %s", exc)
+        return "API key nahi hai bhai — .env check kar."
+
+    except RateLimitError:
+        logger.warning("Rate limit exhausted after all retries.")
+        return "Groq ka quota full ho gaya — thodi der baad aana."
+
+    except APIConnectionError:
+        logger.warning("Groq unreachable after all retries.")
+        return "Network gayab hai — connection dekh."
+
+    except APIStatusError as exc:
+        logger.error("Groq API %d: %s", exc.status_code, exc.message)
+        return f"Groq ne mana kar diya (HTTP {exc.status_code}) — baad mein try."
+
+    except ValueError as exc:
+        return f"Input galat hai: {exc}"
+
+    except Exception:
+        logger.exception("Unhandled error in get_digital_twin_prediction")
+        return "Kuch seriously gadbad hai — server logs dekh."
+
+
+def stream_digital_twin_prediction(user: AbstractBaseUser, scenario: str) -> Iterator[str]:
+    if not scenario or not scenario.strip():
+        yield "Bhai kuch toh bata — blank scenario pe kya bolun?"
+        return
+
+    try:
+        req = PredictionRequest(
+            profile=_fetch_profile(user),
+            scenario=scenario,
+            history=_fetch_history(user),
+        )
+        yield from _stream_llm(req)
+
+    except Exception:
+        logger.exception("Streaming error in stream_digital_twin_prediction")
+        yield "Stream toot gayi yaar — dobara try kar."

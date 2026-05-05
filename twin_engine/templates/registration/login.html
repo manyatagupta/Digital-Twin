@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<title>Login - Digital Twin</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  body { background: #0a0b0f; color: #eef0f8; font-family: 'Space Grotesk', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+  .auth-card { background: #111318; border: 1px solid rgba(255,255,255,0.07); padding: 40px; border-radius: 16px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 4px 24px rgba(0,0,0,0.4); }
+  h2 { color: #c8f135; margin-bottom: 5px; }
+  p { color: #5a6280; font-size: 14px; margin-bottom: 25px; }
+  .field { margin-bottom: 15px; text-align: left; }
+  label { font-size: 12px; color: #8892b0; font-weight: 600; text-transform: uppercase; }
+  input { width: 100%; padding: 12px; margin-top: 5px; background: #181c24; border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; color: white; font-family: 'Space Grotesk'; outline: none; box-sizing: border-box; }
+  input:focus { border-color: #c8f135; }
+  .btn { width: 100%; background: #c8f135; color: #0a0b0f; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; font-family: 'Space Grotesk'; transition: 0.2s; }
+  .btn:hover { opacity: 0.8; }
+  .link { color: #35f1c8; text-decoration: none; font-size: 13px; display: block; margin-top: 15px; }
+</style>
+</head>
+<body>
+  <div class="auth-card">
+    <h2>Welcome Back 🧠</h2>
+    <p>Apne Digital Twin ko jagao.</p>
+    <form method="post">
+      {% csrf_token %}
+      <div class="field">
+        <label>Username</label>
+        <input type="text" name="username" required>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" name="password" required>
+      </div>
+      <button type="submit" class="btn">Login</button>
+    </form>
+    <a href="{% url 'register' %}" class="link">Naya account banayein? Register here</a>
+  </div>
+</body>
+</html>

@@ -25,7 +25,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'twin_engine',  # <--- YEH ADD KARNA ZAROORI THA
+    'twin_engine', 
 ]
 
 MIDDLEWARE = [
@@ -76,7 +76,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata' # India ke time ke hisaab se set kiya hai
 USE_I18N = True
 USE_TZ = True
 
@@ -84,3 +84,11 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ==========================================
+# --- AUTHENTICATION SETTINGS FIX ---
+# ==========================================
+# Ab ye tumhe tumhare custom dark mode login par bhejega!
+LOGIN_URL = '/accounts/login/'
+LOGIN_REDIRECT_URL = '/'  # Login ke baad dashboard par
+LOGOUT_REDIRECT_URL = '/accounts/login/' # Logout ke baad wapas login par

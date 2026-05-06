@@ -106,6 +106,75 @@ def _groq_client() -> Groq:
 
 
 # ---------------------------------------------------------------------------
+# TwinSettings-based System Prompt
+# ---------------------------------------------------------------------------
+
+def get_system_prompt_with_personality(user: AbstractBaseUser) -> str:
+    """Generate system prompt incorporating TwinSettings personality preferences."""
+    from .models import TwinSettings
+    
+    try:
+        settings = TwinSettings.objects.get(user=user)
+    except TwinSettings.DoesNotExist:
+        return _system_prompt(_fetch_profile(user))
+    
+    # Get the base profile
+    profile = _fetch_profile(user)
+    
+    # Build tone description
+    tone_desc = ""
+    if settings.tone_level == 1:
+        tone_desc = "Be very professional, concise, formal, and structured in your responses."
+    elif settings.tone_level == 3:
+        tone_desc = "Be witty, use light humor, sarcasm, and act like a close friend. Make jokes and be playful."
+    else:  # Default to casual
+        tone_desc = "Be helpful, casual, and friendly — like talking to a buddy."
+    
+    # Build language instruction
+    lang_instruction = ""
+    if settings.preferred_language.lower() == "hindi":
+        lang_instruction = "Use pure Hindi (Devanagari script). No English mixing."
+    elif settings.preferred_language.lower() == "english":
+        lang_instruction = "Use only English — no Hindi or Hinglish."
+    else:  # Hinglish
+        lang_instruction = "Use Hinglish (Hindi + English mix) — exactly how real people speak."
+    
+    # Combine custom instructions
+    custom_rules = ""
+    if settings.custom_instructions:
+        custom_rules = f"\n\n━━━ CUSTOM RULES (from you) ━━━\n{settings.custom_instructions}"
+    
+    openers = "\n".join(f'  • "{o}"' for o in _OPENERS)
+    context_hints = _build_context_hints(profile)
+    
+    return f"""\
+Forget you are an AI. You ARE {settings.bot_nickname} ({profile.name}'s Digital Twin). Not a simulation. Not an assistant. You.
+
+━━━ WHO YOU ARE ━━━
+  Name/Alias: {settings.bot_nickname}
+  Real Name : {profile.name}
+  Vibe      : {profile.traits}
+  Food      : {profile.diet}
+  Sleep     : {profile.sleep}
+{context_hints}
+
+━━━ HOW YOU COMMUNICATE ━━━
+  • {lang_instruction}
+  • Tone: {tone_desc}
+  • No motivational fluff, no life-coach energy
+  • Start EVERY reply with one of:
+{openers}
+
+━━━ YOUR RULES (break any of these = you failed) ━━━
+  1. Your answer must only make sense for YOUR specific personality — if it could fit anyone, rewrite it
+  2. 4–6 lines max. Dense and punchy, not watered-down
+  3. Emotion hits first — logic explains after, if at all
+  4. No bullet points, no structure, no AI formatting — just how you'd actually text someone
+  5. NEVER say "I would" — just say what you're doing, present tense, like it's already happening{custom_rules}
+"""
+
+
+# ---------------------------------------------------------------------------
 # Prompt construction
 # ---------------------------------------------------------------------------
 

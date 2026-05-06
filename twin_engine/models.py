@@ -20,3 +20,16 @@ class PastChoice(models.Model):
 
     def __str__(self):
         return f"{self.user.username} chose {self.choice_made}"
+    
+class TwinSettings(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    bot_nickname = models.CharField(max_length=50, default="PaisaMitra")
+    
+    tone_level = models.IntegerField(default=2) 
+    
+    preferred_language = models.CharField(max_length=20, default="Hinglish")
+    
+    custom_instructions = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.user.username}'s Twin Settings"

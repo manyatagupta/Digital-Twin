@@ -3,13 +3,14 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
-from .models import UserPreference, PastChoice
-from .forms import PreferenceForm
-from .logic import get_digital_twin_prediction
+from .models import UserPreference, PastChoice, TwinSettings
+from .forms import PreferenceForm, TwinSettingsForm
+from .logic import get_digital_twin_prediction, get_system_prompt_with_personality
 
 @login_required
 def twin_dashboard(request):
     pref, created = UserPreference.objects.get_or_create(user=request.user)
+    twin_settings, twin_created = TwinSettings.objects.get_or_create(user=request.user)
     
     if request.method == "POST":
         
@@ -27,12 +28,25 @@ def twin_dashboard(request):
             if form.is_valid():
                 form.save()
 
+        elif 'update_twin_settings' in request.POST:
+            twin_form = TwinSettingsForm(request.POST, instance=twin_settings)
+            if twin_form.is_valid():
+                twin_form.save()
+
     form = PreferenceForm(instance=pref)
-    return render(request, 'twin_dashboard.html', {'form': form})
+    twin_form = TwinSettingsForm(instance=twin_settings)
+    
+    context = {
+        'form': form,
+        'twin_form': twin_form,
+        'twin_settings': twin_settings,
+    }
+    
+    return render(request, 'twin_dashboard.html', context)
 
 
 # ==========================================
-# NAYA REGISTER FUNCTION YAHAN ADD KIYA HAI
+# REGISTER FUNCTION
 # ==========================================
 def register(request):
     if request.method == 'POST':

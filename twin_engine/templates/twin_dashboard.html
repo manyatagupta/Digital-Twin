@@ -891,6 +891,103 @@ body::before {
     </form>
   </div>
 
+  <!-- ── Section 1.5: Personality Training Dashboard ── -->
+  <div class="card fade-up">
+    <div class="section-head">
+      <div class="section-icon">🎭</div>
+      <div>
+        <div class="section-title">Personality Training Dashboard</div>
+        <div class="section-sub">Apne Digital Twin ko customize karo — bolne, sochne ke tarike decide karo</div>
+      </div>
+    </div>
+
+    <form id="twinSettingsForm" method="POST">
+      {% csrf_token %}
+      <input type="hidden" name="update_twin_settings" value="1">
+      
+      <div class="form-grid">
+
+        <!-- Bot Nickname -->
+        <div class="field full">
+          <label class="field-label">💬 Twin Ka Naam</label>
+          <input type="text" name="bot_nickname" class="field-input" maxlength="50" placeholder='Apne AI ka nickname (e.g., "Ajay AI", "Mitra", "PaisaMitra")' value="{{ twin_settings.bot_nickname }}">
+          <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+            Apne AI ka nickname define karo (e.g., "Ajay AI", "Mitra", "PaisaMitra")
+          </p>
+        </div>
+
+        <!-- Tone Selection -->
+        <div class="field full">
+          <label class="field-label">🎤 Tone / Personality</label>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 8px;">
+            <label style="display: flex; align-items: center; padding: 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; transition: all var(--transition);">
+              <input type="radio" name="tone_level" value="1" {% if twin_settings.tone_level == 1 %}checked{% endif %} style="cursor: pointer; margin-right: 8px;">
+              <span style="font-size: 12px; color: var(--text);">🎩 Professional</span>
+            </label>
+            <label style="display: flex; align-items: center; padding: 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; transition: all var(--transition);">
+              <input type="radio" name="tone_level" value="2" {% if twin_settings.tone_level == 2 %}checked{% endif %} style="cursor: pointer; margin-right: 8px;">
+              <span style="font-size: 12px; color: var(--text);">😊 Casual</span>
+            </label>
+            <label style="display: flex; align-items: center; padding: 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; transition: all var(--transition);">
+              <input type="radio" name="tone_level" value="3" {% if twin_settings.tone_level == 3 %}checked{% endif %} style="cursor: pointer; margin-right: 8px;">
+              <span style="font-size: 12px; color: var(--text);">😂 Witty</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Language Selection -->
+        <div class="field full">
+          <label class="field-label">🌐 Preferred Language</label>
+          <select name="preferred_language" class="field-select">
+            <option value="Hinglish" {% if twin_settings.preferred_language == "Hinglish" %}selected{% endif %}>Hinglish - Hindi + English Mix</option>
+            <option value="Hindi" {% if twin_settings.preferred_language == "Hindi" %}selected{% endif %}>Hindi - Pure Hindi</option>
+            <option value="English" {% if twin_settings.preferred_language == "English" %}selected{% endif %}>English - Pure English</option>
+          </select>
+          <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+            Hinglish (India vibes), Hindi (Pure), ya English?
+          </p>
+        </div>
+
+        <!-- Custom Instructions -->
+        <div class="field full">
+          <label class="field-label">📝 Custom Rules (Optional)</label>
+          <textarea name="custom_instructions" class="field-textarea" placeholder="Examples: &quot;Kabhi bhi emoji use mat karna&quot;, &quot;Always call me Bhai&quot;, &quot;Be sarcastic about money&quot;">{{ twin_settings.custom_instructions }}</textarea>
+          <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+            Examples: "Kabhi bhi emoji use mat karna", "Always call me Bhai", "Be sarcastic about money"
+          </p>
+        </div>
+
+      </div>
+
+      <div style="margin-top: 20px;">
+        <button type="submit" class="btn-primary">
+          <span>🎭</span> Personality Save Karo
+        </button>
+      </div>
+    </form>
+
+    <!-- Preview Section -->
+    <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border);">
+      <div class="section-title" style="margin-bottom: 12px;">📋 Twin Preview</div>
+      <div style="background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px; font-size: 12px; color: var(--text-mid); line-height: 1.6;">
+        <p><strong style="color: var(--text);">Name:</strong> {{ twin_settings.bot_nickname }}</p>
+        <p style="margin-top: 8px;"><strong style="color: var(--text);">Tone:</strong> 
+          {% if twin_settings.tone_level == 1 %}
+            🎩 Professional & Formal
+          {% elif twin_settings.tone_level == 3 %}
+            😂 Witty & Funny
+          {% else %}
+            😊 Casual & Friendly
+          {% endif %}
+        </p>
+        <p style="margin-top: 8px;"><strong style="color: var(--text);">Language:</strong> {{ twin_settings.preferred_language }}</p>
+        {% if twin_settings.custom_instructions %}
+          <p style="margin-top: 8px;"><strong style="color: var(--text);">Custom Rules:</strong> {{ twin_settings.custom_instructions }}</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
   <!-- ── Section 2: Prediction ── -->
   <div class="card fade-up">
     <div class="section-head">

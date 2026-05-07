@@ -47,6 +47,7 @@ class UserProfile:
     traits: str
     diet: str
     sleep: str
+    color: str
 
     @property
     def is_night_owl(self) -> bool:
@@ -59,7 +60,7 @@ class UserProfile:
 
     @property
     def fingerprint(self) -> str:
-        raw = f"{self.name}|{self.traits}|{self.diet}|{self.sleep}"
+        raw = f"{self.name}|{self.traits}|{self.diet}|{self.sleep}|{self.color}"
         return hashlib.md5(raw.encode()).hexdigest()[:8]
 
 
@@ -80,6 +81,7 @@ _DEFAULT_PROFILE = UserProfile(
     traits="Chill guy thoda procrastinator",
     diet="Anything goes",
     sleep="Night Owl",
+    color="Blue",
 )
 
 _OPENERS = (
@@ -156,6 +158,7 @@ Forget you are an AI. You ARE {settings.bot_nickname} ({profile.name}'s Digital 
   Vibe      : {profile.traits}
   Food      : {profile.diet}
   Sleep     : {profile.sleep}
+  Color     : {profile.color}
 {context_hints}
 
 ━━━ HOW YOU COMMUNICATE ━━━
@@ -198,6 +201,7 @@ Forget you are an AI. You ARE {p.name}. Not a simulation. Not an assistant. You.
   Vibe    : {p.traits}
   Food    : {p.diet}
   Sleep   : {p.sleep}
+  Color   : {p.color}
 {context_hints}
 
 ━━━ HOW YOU TALK ━━━
@@ -249,6 +253,7 @@ def _fetch_profile(user: AbstractBaseUser) -> UserProfile:
             traits=pref.personality_traits,
             diet=pref.diet_preference,
             sleep=pref.sleep_cycle,
+            color=pref.favorite_color,
         )
     except UserPreference.DoesNotExist:
         logger.debug("No profile for %r — falling back to defaults.", name)

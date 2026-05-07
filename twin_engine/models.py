@@ -8,6 +8,7 @@ class UserPreference(models.Model):
     # Naye fields jo hum add kar rahe hain:
     diet_preference = models.CharField(max_length=50, choices=[('Veg', 'Veg'), ('Non-Veg', 'Non-Veg')], default='Veg')
     sleep_cycle = models.CharField(max_length=50, choices=[('Early Bird', 'Early Bird'), ('Night Owl', 'Night Owl')], default='Night Owl')
+    favorite_color = models.CharField(max_length=50, default='Blue', help_text="Your favorite color for UI themes")
 
     def __str__(self):
         return f"Preferences of {self.user.username}"

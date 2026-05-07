@@ -4,7 +4,7 @@ from .models import UserPreference, TwinSettings
 class PreferenceForm(forms.ModelForm):
     class Meta:
         model = UserPreference
-        fields = ['personality_traits', 'diet_preference', 'sleep_cycle']
+        fields = ['personality_traits', 'diet_preference', 'sleep_cycle', 'favorite_color']
         
         widgets = {
             'personality_traits': forms.Textarea(attrs={
@@ -14,6 +14,10 @@ class PreferenceForm(forms.ModelForm):
             }),
             'diet_preference': forms.Select(attrs={'class': 'form-control'}),
             'sleep_cycle': forms.Select(attrs={'class': 'form-control'}),
+            'favorite_color': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g., Blue, Green, Red...'
+            }),
         }
 
 

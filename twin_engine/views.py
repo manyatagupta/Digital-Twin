@@ -40,6 +40,7 @@ def twin_dashboard(request):
         'form': form,
         'twin_form': twin_form,
         'twin_settings': twin_settings,
+        'favorite_color': pref.favorite_color,
     }
     
     return render(request, 'twin_dashboard.html', context)

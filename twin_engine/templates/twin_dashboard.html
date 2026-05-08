@@ -944,6 +944,22 @@ body::before {
           </p>
         </div>
 
+        <!-- Current Mood -->
+        <div class="field full">
+          <label class="field-label">🧠 Current Mood</label>
+          <select name="last_mood" class="field-select">
+            <option value="Happy" {% if twin_settings.last_mood == "Happy" %}selected{% endif %}>😊 Happy</option>
+            <option value="Chill" {% if twin_settings.last_mood == "Chill" %}selected{% endif %}>😎 Chill</option>
+            <option value="Stressed" {% if twin_settings.last_mood == "Stressed" %}selected{% endif %}>😤 Stressed</option>
+            <option value="Motivated" {% if twin_settings.last_mood == "Motivated" %}selected{% endif %}>🔥 Motivated</option>
+            <option value="Tired" {% if twin_settings.last_mood == "Tired" %}selected{% endif %}>😫 Tired</option>
+            <option value="Focused" {% if twin_settings.last_mood == "Focused" %}selected{% endif %}>🎯 Focused</option>
+          </select>
+          <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+            Mood ke hisaab se AI ki empathy level aur tone set hoti hai.
+          </p>
+        </div>
+
         <!-- Custom Instructions -->
         <div class="field full">
           <label class="field-label">📝 Custom Rules (Optional)</label>

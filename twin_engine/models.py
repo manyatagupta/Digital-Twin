@@ -31,6 +31,7 @@ class TwinSettings(models.Model):
     preferred_language = models.CharField(max_length=20, default="Hinglish")
     
     custom_instructions = models.TextField(blank=True, null=True)
+    last_mood = models.CharField(max_length=50, default="Happy", help_text="Current emotional state for mood-aware responses")
 
     def __str__(self):
         return f"{self.user.username}'s Twin Settings"

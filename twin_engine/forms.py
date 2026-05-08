@@ -31,10 +31,23 @@ class TwinSettingsForm(forms.ModelForm):
     tone_level = forms.ChoiceField(choices=TONE_CHOICES, widget=forms.RadioSelect(attrs={
         'class': 'form-check-input'
     }))
+
+    MOOD_CHOICES = [
+        ('Happy', '😊 Happy'),
+        ('Chill', '😎 Chill'),
+        ('Stressed', '😤 Stressed'),
+        ('Motivated', '🔥 Motivated'),
+        ('Tired', '😫 Tired'),
+        ('Focused', '🎯 Focused'),
+    ]
+
+    last_mood = forms.ChoiceField(choices=MOOD_CHOICES, widget=forms.Select(attrs={
+        'class': 'form-control'
+    }))
     
     class Meta:
         model = TwinSettings
-        fields = ['bot_nickname', 'tone_level', 'preferred_language', 'custom_instructions']
+        fields = ['bot_nickname', 'tone_level', 'preferred_language', 'last_mood', 'custom_instructions']
         
         widgets = {
             'bot_nickname': forms.TextInput(attrs={

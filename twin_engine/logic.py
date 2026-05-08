@@ -48,6 +48,7 @@ class UserProfile:
     diet: str
     sleep: str
     color: str
+    mood: str = "Happy"
 
     @property
     def is_night_owl(self) -> bool:
@@ -149,6 +150,7 @@ def get_system_prompt_with_personality(user: AbstractBaseUser) -> str:
     openers = "\n".join(f'  • "{o}"' for o in _OPENERS)
     context_hints = _build_context_hints(profile)
     
+    mood_desc = settings.last_mood or 'Happy'
     return f"""\
 Forget you are an AI. You ARE {settings.bot_nickname} ({profile.name}'s Digital Twin). Not a simulation. Not an assistant. You.
 
@@ -159,11 +161,13 @@ Forget you are an AI. You ARE {settings.bot_nickname} ({profile.name}'s Digital 
   Food      : {profile.diet}
   Sleep     : {profile.sleep}
   Color     : {profile.color}
+  Mood      : {mood_desc}
 {context_hints}
 
 ━━━ HOW YOU COMMUNICATE ━━━
   • {lang_instruction}
   • Tone: {tone_desc}
+  • The user is currently feeling {mood_desc}. Adjust your empathy level accordingly.
   • No motivational fluff, no life-coach energy
   • Start EVERY reply with one of:
 {openers}
@@ -202,11 +206,13 @@ Forget you are an AI. You ARE {p.name}. Not a simulation. Not an assistant. You.
   Food    : {p.diet}
   Sleep   : {p.sleep}
   Color   : {p.color}
+  Mood    : {p.mood}
 {context_hints}
 
 ━━━ HOW YOU TALK ━━━
   • Raw Hinglish — the exact mix {p.name} uses in real life, not textbook
   • No motivational fluff, no life-coach energy, no "on the other hand"
+  • The user is currently feeling {p.mood}. Adjust your empathy level accordingly.
   • You have takes. Strong ones. You don't hedge.
   • Start EVERY reply with one of:
 {openers}
@@ -242,9 +248,16 @@ Ab bata — tu kya kar raha hai? First instinct. No overthinking. Go.\
 # ---------------------------------------------------------------------------
 
 def _fetch_profile(user: AbstractBaseUser) -> UserProfile:
-    from .models import UserPreference
+    from .models import UserPreference, TwinSettings
 
     name = user.username if getattr(user, "is_authenticated", False) else _DEFAULT_PROFILE.name
+    mood = _DEFAULT_PROFILE.mood
+
+    try:
+        settings = TwinSettings.objects.get(user=user)
+        mood = settings.last_mood or mood
+    except TwinSettings.DoesNotExist:
+        pass
 
     try:
         pref = UserPreference.objects.get(user=user)
@@ -254,6 +267,7 @@ def _fetch_profile(user: AbstractBaseUser) -> UserProfile:
             diet=pref.diet_preference,
             sleep=pref.sleep_cycle,
             color=pref.favorite_color,
+            mood=mood,
         )
     except UserPreference.DoesNotExist:
         logger.debug("No profile for %r — falling back to defaults.", name)

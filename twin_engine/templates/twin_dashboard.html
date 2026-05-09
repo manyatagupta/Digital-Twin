@@ -783,6 +783,18 @@ body::before {
     </div>
   </div>
 
+<!-- Spotify Player -->
+<div class="spotify-container" style="margin-top: 25px; border: 1px solid #1DB954; border-radius: 15px; padding: 10px; background: #121212;">
+    <p style="color: #1DB954; font-weight: bold; margin-bottom: 8px;">🎵 Twin's Vibe Player</p>
+    <iframe style="border-radius:12px" 
+        src="{{ spotify_link }}" 
+        width="100%" height="152" 
+        frameBorder="0" allowfullscreen="" 
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+        loading="lazy">
+    </iframe>
+</div>
+
   <!-- ── Section 1: Configure ── -->
   <div class="card fade-up">
     <div class="section-head">
@@ -1371,7 +1383,7 @@ function showOutput(text, scenario) {
       </div>
       <p class="output-text" id="outText">${escapeHtml(text)}</p>
       <div class="output-footer">
-        <span class="meta-item">🤖 claude-sonnet-4</span>
+
         <span class="meta-item">🕐 ${hour}</span>
         <span class="meta-item" style="margin-left: auto; cursor: pointer; color: var(--accent2);" onclick="bookmarkCurrent()">🔖 Save</span>
       </div>

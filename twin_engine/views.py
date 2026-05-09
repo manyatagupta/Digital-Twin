@@ -10,7 +10,7 @@ from .logic import get_digital_twin_prediction, get_system_prompt_with_personali
 @login_required
 def twin_dashboard(request):
     pref, created = UserPreference.objects.get_or_create(user=request.user)
-    twin_settings, twin_created = TwinSettings.objects.get_or_create(user=request.user)
+    twin_settings, created = TwinSettings.objects.get_or_create(user=request.user)
     
     if request.method == "POST":
         
@@ -36,13 +36,25 @@ def twin_dashboard(request):
     form = PreferenceForm(instance=pref)
     twin_form = TwinSettingsForm(instance=twin_settings)
     
+    # Mood ke hisaab se Spotify ID map karo
+    mood_map = {
+        'Stressed': '37i9dQZF1DWZqd5YICuS7s', # Lofi
+        'Tired': '37i9dQZF1DWZqd5YICuS7s',
+        'Motivated': '37i9dQZF1DXdxcBWu9YQL3', # Power
+        'Focused': '37i9dQZF1DXdxcBWu9YQL3',
+        'Happy': '37i9dQZF1DX3rxVfibe1L0', # Feel Good
+        'Chill': '37i9dQZF1DX3rxVfibe1L0',
+    }
+    
+    playlist_id = mood_map.get(twin_settings.last_mood, '37i9dQZF1DX4WYpdgoIcnm') # Default
+    
     context = {
         'form': form,
         'twin_form': twin_form,
         'twin_settings': twin_settings,
         'favorite_color': pref.favorite_color,
+        'spotify_link': f"https://open.spotify.com/embed/playlist/{playlist_id}"
     }
-    
     return render(request, 'twin_dashboard.html', context)
 
 

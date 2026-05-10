@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import time
+import json
 import logging
 import hashlib
 from dataclasses import dataclass, field
@@ -402,3 +403,67 @@ def stream_digital_twin_prediction(user: AbstractBaseUser, scenario: str) -> Ite
     except Exception:
         logger.exception("Streaming error in stream_digital_twin_prediction")
         yield "Stream toot gayi yaar — dobara try kar."
+
+
+def get_ai_debate(user: AbstractBaseUser, topic: str, opponent_type: str) -> list[dict]:
+    """Generates an AI vs AI debate based on user's twin profile and a selected opponent."""
+    from .models import TwinSettings
+
+    profile = _fetch_profile(user)
+    
+    try:
+        settings = TwinSettings.objects.get(user=user)
+        twin_name = settings.bot_nickname or profile.name
+    except TwinSettings.DoesNotExist:
+        twin_name = profile.name
+
+    if opponent_type == "Strict Professor":
+        opp_persona = "B.Tech CSE ka ek bohot strict, gusse wala Professor (HOD) jo attendance aur assignment ke peeche pada rehta hai."
+    elif opponent_type == "Shahrukh Khan":
+        opp_persona = "Shahrukh Khan (SRK) from Bollywood. Romantic, dramatic, aur hamesha apne dialogue bolne wala banda."
+    else:
+        opp_persona = "Ek typical Indian Padosi Sharma Ji jo hamesha taane maarte hain aur dusro se compare karte hain."
+
+    system_prompt = f"""\
+You are an expert scriptwriter. Write a funny, aggressive 4-dialogue debate in Hinglish.
+
+Speaker 1 ('Opponent'): {opp_persona}
+Speaker 2 ('Twin'): Name is {twin_name}. Traits: {profile.traits}, Sleep: {profile.sleep}, Diet: {profile.diet}.
+
+Topic of debate: "{topic}"
+
+RULES:
+1. Opponent starts the debate.
+2. Twin defends itself using its lazy/student traits.
+3. Output strictly in this JSON array format, nothing else:
+[
+    {{"speaker": "Opponent", "text": "..."}},
+    {{"speaker": "Twin", "text": "..."}},
+    {{"speaker": "Opponent", "text": "..."}},
+    {{"speaker": "Twin", "text": "..."}}
+]
+"""
+
+    try:
+        completion = _groq_client().chat.completions.create(
+            model=_CFG.model,
+            messages=[{"role": "system", "content": system_prompt}],
+            temperature=0.8,
+            max_tokens=600,
+        )
+        
+        response_text = completion.choices[0].message.content.strip()
+        
+        # Safely extract JSON array
+        start_idx = response_text.find('[')
+        end_idx = response_text.rfind(']') + 1
+        
+        if start_idx != -1 and end_idx != -1:
+            json_data = response_text[start_idx:end_idx]
+            return json.loads(json_data)
+        else:
+            return [{"speaker": "System", "text": "Bhai script samajh nahi aayi, AI ne JSON format tod diya."}]
+            
+    except Exception as e:
+        logger.error("Debate API Error: %s", e)
+        return [{"speaker": "System", "text": "Bhai Groq API me error aa gaya. Thodi der me try kar."}]

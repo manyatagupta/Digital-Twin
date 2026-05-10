@@ -191,6 +191,11 @@ body::before {
 .textarea-wrap { position: relative; }
 .char-count { position: absolute; bottom: 10px; right: 12px; font-size: 11px; color: var(--text-muted); pointer-events: none; background: var(--surface2); padding: 2px 6px; border-radius: 4px; }
 
+/* ── Roast-o-Meter ── */
+#roastMeterContainer { display: none; margin-top: 20px; background: var(--surface3); padding: 15px; border-radius: var(--radius-sm); border: 1px solid var(--border); }
+.meter-bar { width: 100%; height: 8px; background: var(--bg); border-radius: 10px; overflow: hidden; margin-top: 8px; border: 1px solid var(--border); }
+.meter-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #f1c40f, #e67e22, #e74c3c); transition: width 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
 /* ── Output Card ── */
 .output-card { background: var(--surface2); border: 1px solid var(--border-hover); border-radius: var(--radius); padding: 24px; position: relative; overflow: hidden; margin-top: 16px; }
 .output-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, var(--accent), var(--accent2)); opacity: 0.6; }
@@ -279,8 +284,8 @@ body::before {
     </div>
   </div>
 
-  <div class="media-container fade-up" style="border: 1px solid #1DB954; border-radius: 15px; padding: 10px; background: #121212; margin-bottom: 24px;">
-      <p style="color: #1DB954; font-weight: bold; margin-bottom: 8px;">🎵 Twin's Mood Vibe</p>
+  <div class="card fade-up" style="padding: 12px; border-color: #1DB954;">
+      <p style="color: #1DB954; font-weight: bold; margin-bottom: 8px; font-size: 13px;">🎵 Twin's Mood Vibe</p>
       <iframe style="border-radius:12px" src="{{ spotify_link }}" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
   </div>
 
@@ -298,7 +303,7 @@ body::before {
 
         <div class="field">
           <label class="field-label">Tera Naam</label>
-          <input type="text" name="name" class="field-input" placeholder="e.g. Ajay, Priya…">
+          <input type="text" name="name" class="field-input" placeholder="e.g. Ajay...">
         </div>
 
         <div class="field">
@@ -420,7 +425,7 @@ body::before {
             </label>
             <label style="display: flex; align-items: center; padding: 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer;">
               <input type="radio" name="tone_level" value="3" {% if twin_settings.tone_level == 3 %}checked{% endif %} style="margin-right: 8px;">
-              <span style="font-size: 12px; color: var(--text);">😂 Witty</span>
+              <span style="font-size: 12px; color: var(--text);">😂 Witty/Savage</span>
             </label>
           </div>
         </div>
@@ -521,6 +526,14 @@ body::before {
           <span>✦</span> Digital Twin Se Pucho
         </button>
         <button class="btn-icon" onclick="clearAll()" title="Clear">✕</button>
+      </div>
+
+      <div id="roastMeterContainer">
+          <div style="display: flex; justify-content: space-between;">
+              <span style="font-size: 11px; font-weight: bold; color: var(--accent3);">🔥 ROAST-O-METER</span>
+              <span id="roastStatus" style="font-size: 11px; font-weight: bold;">WAITING...</span>
+          </div>
+          <div class="meter-bar"><div id="roastBar" class="meter-fill"></div></div>
       </div>
 
       <div id="outputArea"></div>
@@ -670,6 +683,7 @@ function clearAll() {
   document.getElementById('moodInput').value = '';
   currentMood = '';
   document.getElementById('outputArea').innerHTML = '';
+  document.getElementById('roastMeterContainer').style.display = 'none';
 }
 function selectMood(el) {
   document.querySelectorAll('.mood-pill').forEach(p => p.classList.remove('active'));
@@ -678,7 +692,7 @@ function selectMood(el) {
   document.getElementById('moodInput').value = currentMood;
 }
 
-// ── Main Prediction (Django CSRF) ──
+// ── Main Prediction & Roast-o-Meter ──
 async function getPrediction() {
   const scenario = document.getElementById('scenarioInput').value.trim();
   if (!scenario) { showToast('Pehle scenario likho! ✍️'); return; }
@@ -701,8 +715,11 @@ async function getPrediction() {
 
     if (!res.ok) throw new Error('Django Backend Error: ' + res.status);
     const data = await res.json();
+    
     showOutput(data.prediction, scenario);
+    triggerRoastMeter(data.prediction);
     savePrediction(scenario, data.prediction);
+    
   } catch (err) {
     showError(err.message);
   } finally {
@@ -741,6 +758,29 @@ function showOutput(text, scenario) {
   document.getElementById('outCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
+function triggerRoastMeter(text) {
+  const container = document.getElementById('roastMeterContainer');
+  const bar = document.getElementById('roastBar');
+  const status = document.getElementById('roastStatus');
+  
+  container.style.display = 'block';
+  
+  let score = 30; // Base score
+  const savageWords = ['soja', 'bhai', 'abe', 'gadhe', 'procrastinator', 'sharam', 'padh', 'reels', 'beta', 'kya kar raha hai'];
+  savageWords.forEach(w => { if(text.toLowerCase().includes(w)) score += 12; });
+  if (text.length > 120) score += 10;
+  
+  score = Math.min(score, 100);
+  
+  bar.style.width = '0%'; // Reset first
+  setTimeout(() => {
+    bar.style.width = score + '%';
+    if(score < 50) status.innerText = "CHILL 😊";
+    else if(score < 80) status.innerText = "SAVAGE 💀";
+    else status.innerText = "BRUTAL DESTRUCTION 🌋";
+  }, 100);
+}
+
 function showError(msg) {
   document.getElementById('outputArea').innerHTML = `<div class="output-card"><p style="color: var(--accent3);">⚠️ ${msg}</p></div>`;
 }
@@ -756,7 +796,7 @@ async function startDebate() {
   const area = document.getElementById('debateArea');
   
   btn.disabled = true;
-  btn.innerHTML = '<span>⏳</span> Script likh raha hai...';
+  btn.innerHTML = '<span>⏳</span> Scripting Fight...';
   area.innerHTML = '<div class="typing-indicator" style="margin: auto;"><span></span><span></span><span></span></div>';
 
   try {
@@ -774,7 +814,6 @@ async function startDebate() {
     const data = await res.json();
     area.innerHTML = ''; 
 
-    // Dialogue playback with delay
     data.script.forEach((line, index) => {
       setTimeout(() => {
         const isTwin = line.speaker === "Twin";

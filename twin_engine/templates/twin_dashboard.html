@@ -58,7 +58,7 @@ body {
   transition: background var(--transition), color var(--transition);
 }
 
-/* Grid BG — only dark mode */
+/* Grid BG */
 body::before {
   content: '';
   position: fixed;
@@ -104,632 +104,132 @@ body::before {
   margin-bottom: 48px;
 }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.brand-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: var(--accent-dim);
-  border: 1px solid var(--border-hover);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 17px;
-}
-
-.brand-name {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text);
-  letter-spacing: -0.3px;
-}
-
-.brand-tag {
-  font-size: 11px;
-  color: var(--text-muted);
-  font-weight: 400;
-}
-
-.topbar-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.theme-btn {
-  width: 38px;
-  height: 38px;
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  cursor: pointer;
-  color: var(--text-mid);
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--transition);
-}
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-icon { width: 36px; height: 36px; border-radius: 10px; background: var(--accent-dim); border: 1px solid var(--border-hover); display: flex; align-items: center; justify-content: center; font-size: 17px; }
+.brand-name { font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: -0.3px; }
+.brand-tag { font-size: 11px; color: var(--text-muted); font-weight: 400; }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.theme-btn { width: 38px; height: 38px; border-radius: var(--radius-sm); background: var(--surface); border: 1px solid var(--border); cursor: pointer; color: var(--text-mid); font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all var(--transition); }
 .theme-btn:hover { border-color: var(--border-hover); color: var(--text); }
 
-.status-pill {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
-  padding: 6px 14px;
-  font-size: 12px;
-  color: var(--text-mid);
-  font-weight: 500;
-}
-
-.status-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--accent);
-  animation: blink 2s ease-in-out infinite;
-}
-
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
-}
+.status-pill { display: flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-full); padding: 6px 14px; font-size: 12px; color: var(--text-mid); font-weight: 500; }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: blink 2s ease-in-out infinite; }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
 /* ── Hero ── */
-.hero {
-  text-align: center;
-  margin-bottom: 40px;
-}
-
-.hero h1 {
-  font-size: clamp(32px, 6vw, 62px);
-  font-weight: 700;
-  letter-spacing: -2px;
-  line-height: 1.05;
-  margin-bottom: 14px;
-}
-
-.hero h1 em {
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-weight: 400;
-  color: var(--accent);
-  letter-spacing: -1px;
-}
-
-.hero p {
-  font-size: 15px;
-  color: var(--text-muted);
-  font-weight: 400;
-  max-width: 400px;
-  margin: 0 auto;
-  line-height: 1.7;
-}
+.hero { text-align: center; margin-bottom: 40px; }
+.hero h1 { font-size: clamp(32px, 6vw, 62px); font-weight: 700; letter-spacing: -2px; line-height: 1.05; margin-bottom: 14px; }
+.hero h1 em { font-family: var(--font-serif); font-style: italic; font-weight: 400; color: var(--accent); letter-spacing: -1px; }
+.hero p { font-size: 15px; color: var(--text-muted); font-weight: 400; max-width: 400px; margin: 0 auto; line-height: 1.7; }
 
 /* ── Stats ── */
-.stats-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-bottom: 24px;
-}
-
-.stat-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 16px 14px;
-  text-align: center;
-  transition: border-color var(--transition);
-}
+.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 24px; }
+.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px 14px; text-align: center; transition: border-color var(--transition); }
 .stat-card:hover { border-color: var(--border-hover); }
-
-.stat-num {
-  font-size: 26px;
-  font-weight: 700;
-  color: var(--accent);
-  letter-spacing: -1px;
-  line-height: 1;
-  margin-bottom: 4px;
-}
-
-.stat-label {
-  font-size: 11px;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 1.2px;
-  font-weight: 500;
-}
+.stat-num { font-size: 26px; font-weight: 700; color: var(--accent); letter-spacing: -1px; line-height: 1; margin-bottom: 4px; }
+.stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.2px; font-weight: 500; }
 
 /* ── Card ── */
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 28px;
-  margin-bottom: 16px;
-  transition: border-color var(--transition), background var(--transition);
-}
-
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; margin-bottom: 16px; transition: border-color var(--transition), background var(--transition); }
 .card:hover { border-color: rgba(255,255,255,0.1); }
 
 /* ── Section Header ── */
-.section-head {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--border);
-}
-
-.section-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: var(--accent-dim);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  flex-shrink: 0;
-}
-
+.section-head { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+.section-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--accent-dim); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
 .section-icon.teal { background: rgba(53,241,200,0.1); }
 .section-icon.orange { background: rgba(241,112,53,0.1); }
-
-.section-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 2px;
-}
-
-.section-sub {
-  font-size: 12px;
-  color: var(--text-muted);
-  font-weight: 400;
-}
+.section-icon.red { background: rgba(255, 71, 87, 0.1); }
+.section-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.section-sub { font-size: 12px; color: var(--text-muted); font-weight: 400; }
 
 /* ── Form ── */
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-}
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .form-grid .full { grid-column: 1 / -1; }
-
 .field { display: flex; flex-direction: column; gap: 6px; }
-
-.field-label {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-
-.field-input,
-.field-select,
-.field-textarea {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  color: var(--text);
-  font-family: var(--font);
-  font-size: 14px;
-  padding: 11px 14px;
-  width: 100%;
-  outline: none;
-  transition: border-color var(--transition), background var(--transition);
-  -webkit-appearance: none;
-}
-
-.field-select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%235a6280' d='M5 6L0 0h10z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 14px center;
-  padding-right: 36px;
-  cursor: pointer;
-}
-
+.field-label { font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-muted); }
+.field-input, .field-select, .field-textarea { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-family: var(--font); font-size: 14px; padding: 11px 14px; width: 100%; outline: none; transition: border-color var(--transition), background var(--transition); -webkit-appearance: none; }
+.field-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%235a6280' d='M5 6L0 0h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; cursor: pointer; }
 .field-select option { background: #181c24; color: #eef0f8; }
 [data-theme="light"] .field-select option { background: #fff; color: #1a1c22; }
+.field-textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+.field-input:focus, .field-select:focus, .field-textarea:focus { border-color: var(--border-hover); background: var(--surface3); }
 
-.field-textarea {
-  resize: vertical;
-  min-height: 90px;
-  line-height: 1.6;
-}
-
-.field-input:focus,
-.field-select:focus,
-.field-textarea:focus {
-  border-color: var(--border-hover);
-  background: var(--surface3);
-}
-
-.field-input::placeholder,
-.field-textarea::placeholder { color: var(--text-muted); opacity: 0.7; }
-
-/* ── Divider ── */
-.divider {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin: 22px 0;
-  font-size: 11px;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-.divider::before, .divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--border);
-}
-
-/* ── Toggle ── */
-.toggle-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border);
-}
+/* ── Divider & Toggle ── */
+.divider { display: flex; align-items: center; gap: 14px; margin: 22px 0; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); }
+.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
 .toggle-row:last-of-type { border-bottom: none; }
-
-.toggle-info h4 {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text);
-  margin-bottom: 2px;
-}
+.toggle-info h4 { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
 .toggle-info p { font-size: 11px; color: var(--text-muted); }
-
-.toggle {
-  position: relative;
-  width: 42px;
-  height: 22px;
-  flex-shrink: 0;
-}
+.toggle { position: relative; width: 42px; height: 22px; flex-shrink: 0; }
 .toggle input { opacity: 0; width: 0; height: 0; }
-.toggle-slider {
-  position: absolute;
-  inset: 0;
-  background: var(--surface3);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
-  cursor: pointer;
-  transition: 0.25s;
-}
-.toggle-slider::before {
-  content: '';
-  position: absolute;
-  width: 14px;
-  height: 14px;
-  left: 3px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: var(--text-muted);
-  border-radius: 50%;
-  transition: 0.25s;
-}
+.toggle-slider { position: absolute; inset: 0; background: var(--surface3); border: 1px solid var(--border); border-radius: var(--radius-full); cursor: pointer; transition: 0.25s; }
+.toggle-slider::before { content: ''; position: absolute; width: 14px; height: 14px; left: 3px; top: 50%; transform: translateY(-50%); background: var(--text-muted); border-radius: 50%; transition: 0.25s; }
 .toggle input:checked + .toggle-slider { background: var(--accent-dim); border-color: var(--border-hover); }
 .toggle input:checked + .toggle-slider::before { left: 23px; background: var(--accent); }
 
 /* ── Buttons ── */
-.btn-primary {
-  background: var(--accent);
-  color: #0a0b0f;
-  font-family: var(--font);
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  border: none;
-  border-radius: var(--radius-sm);
-  padding: 13px 24px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
+.btn-primary { background: var(--accent); color: #0a0b0f; font-family: var(--font); font-size: 13px; font-weight: 700; letter-spacing: 0.5px; border: none; border-radius: var(--radius-sm); padding: 13px 24px; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px; }
 .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
 .btn-primary:active { transform: translateY(0); opacity: 1; }
 .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-.btn-secondary {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text-mid);
-  font-family: var(--font);
-  font-size: 13px;
-  font-weight: 500;
-  border-radius: var(--radius-sm);
-  padding: 11px 20px;
-  cursor: pointer;
-  transition: all var(--transition);
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
+.btn-secondary { background: transparent; border: 1px solid var(--border); color: var(--text-mid); font-family: var(--font); font-size: 13px; font-weight: 500; border-radius: var(--radius-sm); padding: 11px 20px; cursor: pointer; transition: all var(--transition); display: inline-flex; align-items: center; gap: 8px; }
 .btn-secondary:hover { border-color: var(--border-hover); color: var(--text); background: var(--accent-dim); }
-
-.btn-icon {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  color: var(--text-mid);
-  border-radius: var(--radius-sm);
-  width: 42px;
-  height: 42px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 15px;
-  transition: all var(--transition);
-}
+.btn-icon { background: var(--surface2); border: 1px solid var(--border); color: var(--text-mid); border-radius: var(--radius-sm); width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 15px; transition: all var(--transition); }
 .btn-icon:hover { border-color: var(--border-hover); color: var(--text); }
-
 .btn-row { display: flex; gap: 10px; align-items: center; }
 
 /* ── Chat / Predict section ── */
-.chat-area {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-/* Chips */
-.chips-label {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin-bottom: 8px;
-}
-
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 4px;
-}
-
-.chip {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
-  padding: 6px 12px;
-  font-size: 12px;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: all 0.15s ease;
-  white-space: nowrap;
-  user-select: none;
-  font-family: var(--font);
-}
-.chip:hover {
-  background: var(--accent-dim);
-  border-color: var(--border-hover);
-  color: var(--accent);
-}
-.chip.active {
-  background: var(--accent-dim);
-  border-color: var(--border-hover);
-  color: var(--accent);
-}
-
-/* Mood pills */
-.mood-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.mood-pill {
-  padding: 7px 14px;
-  border-radius: var(--radius-full);
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.15s;
-  user-select: none;
-  font-family: var(--font);
-  color: var(--text-mid);
-}
-.mood-pill:hover, .mood-pill.active {
-  background: var(--accent-dim);
-  border-color: var(--border-hover);
-  color: var(--accent);
-}
-
-/* Textarea with counter */
+.chat-area { display: flex; flex-direction: column; gap: 14px; }
+.chips-label { font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
+.chip { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-full); padding: 6px 12px; font-size: 12px; color: var(--text-muted); cursor: pointer; transition: all 0.15s ease; white-space: nowrap; user-select: none; font-family: var(--font); }
+.chip:hover, .chip.active { background: var(--accent-dim); border-color: var(--border-hover); color: var(--accent); }
+.mood-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.mood-pill { padding: 7px 14px; border-radius: var(--radius-full); background: var(--surface2); border: 1px solid var(--border); font-size: 12px; cursor: pointer; transition: all 0.15s; user-select: none; font-family: var(--font); color: var(--text-mid); }
+.mood-pill:hover, .mood-pill.active { background: var(--accent-dim); border-color: var(--border-hover); color: var(--accent); }
 .textarea-wrap { position: relative; }
-.char-count {
-  position: absolute;
-  bottom: 10px;
-  right: 12px;
-  font-size: 11px;
-  color: var(--text-muted);
-  pointer-events: none;
-  background: var(--surface2);
-  padding: 2px 6px;
-  border-radius: 4px;
-}
+.char-count { position: absolute; bottom: 10px; right: 12px; font-size: 11px; color: var(--text-muted); pointer-events: none; background: var(--surface2); padding: 2px 6px; border-radius: 4px; }
 
 /* ── Output Card ── */
-.output-card {
-  background: var(--surface2);
-  border: 1px solid var(--border-hover);
-  border-radius: var(--radius);
-  padding: 24px;
-  position: relative;
-  overflow: hidden;
-  margin-top: 16px;
-}
-
-.output-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, var(--accent), var(--accent2));
-  opacity: 0.6;
-}
-
-.output-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-}
-
-.output-tag {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: var(--accent);
-}
-
-.output-text {
-  font-family: var(--font-serif);
-  font-size: 19px;
-  font-style: italic;
-  line-height: 1.75;
-  color: var(--text);
-}
-
-.output-footer {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 16px;
-  padding-top: 14px;
-  border-top: 1px solid var(--border);
-}
-
-.meta-item {
-  font-size: 11px;
-  color: var(--text-muted);
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-/* Typing animation */
-.typing-indicator {
-  display: flex;
-  gap: 5px;
-  align-items: center;
-  padding: 4px 0;
-}
-.typing-indicator span {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--accent);
-  opacity: 0.4;
-  animation: typingBounce 1.2s ease-in-out infinite;
-}
+.output-card { background: var(--surface2); border: 1px solid var(--border-hover); border-radius: var(--radius); padding: 24px; position: relative; overflow: hidden; margin-top: 16px; }
+.output-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, var(--accent), var(--accent2)); opacity: 0.6; }
+.output-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.output-tag { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); }
+.output-text { font-family: var(--font-serif); font-size: 19px; font-style: italic; line-height: 1.75; color: var(--text); }
+.output-footer { display: flex; align-items: center; gap: 12px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
+.meta-item { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; }
+.typing-indicator { display: flex; gap: 5px; align-items: center; padding: 4px 0; }
+.typing-indicator span { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); opacity: 0.4; animation: typingBounce 1.2s ease-in-out infinite; }
 .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
 .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-
-@keyframes typingBounce {
-  0%, 100% { opacity: 0.4; transform: translateY(0); }
-  50% { opacity: 1; transform: translateY(-4px); }
-}
-
-/* Reaction buttons */
-.reaction-row {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-top: 12px;
-}
-
-/* Copy btn */
-.copy-btn {
-  background: var(--surface3);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 5px 12px;
-  font-size: 11px;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: all var(--transition);
-  font-family: var(--font);
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
+@keyframes typingBounce { 0%, 100% { opacity: 0.4; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-4px); } }
+.reaction-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 12px; }
+.copy-btn { background: var(--surface3); border: 1px solid var(--border); border-radius: 8px; padding: 5px 12px; font-size: 11px; color: var(--text-muted); cursor: pointer; transition: all var(--transition); font-family: var(--font); display: flex; align-items: center; gap: 5px; }
 .copy-btn:hover { color: var(--text); border-color: var(--border-hover); }
 
 /* ── History ── */
 .history-list { display: flex; flex-direction: column; gap: 10px; }
-
-.history-item {
-  display: flex;
-  gap: 12px;
-  padding: 14px;
-  background: var(--surface2);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  align-items: flex-start;
-  transition: border-color var(--transition);
-}
+.history-item { display: flex; gap: 12px; padding: 14px; background: var(--surface2); border-radius: var(--radius-sm); border: 1px solid var(--border); align-items: flex-start; transition: border-color var(--transition); }
 .history-item:hover { border-color: var(--border-hover); }
-
-.h-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--accent2);
-  flex-shrink: 0;
-  margin-top: 5px;
-}
-
+.h-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent2); flex-shrink: 0; margin-top: 5px; }
 .h-scenario { font-size: 12px; color: var(--text-muted); margin-bottom: 3px; }
 .h-choice { font-size: 13px; color: var(--text); font-weight: 500; }
 .h-time { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
 
 /* ── Fade Up Anim ── */
-.fade-up {
-  animation: fadeUp 0.6s ease both;
-}
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(18px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
+.fade-up { animation: fadeUp 0.6s ease both; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
 .fade-up:nth-child(2) { animation-delay: 0.08s; }
 .fade-up:nth-child(3) { animation-delay: 0.16s; }
 .fade-up:nth-child(4) { animation-delay: 0.24s; }
+.fade-up:nth-child(5) { animation-delay: 0.32s; }
 
-/* ── Responsive ── */
 @media (max-width: 600px) {
   .form-grid { grid-template-columns: 1fr; }
   .stats-row { grid-template-columns: 1fr 1fr; }
   .btn-row { flex-wrap: wrap; }
   .card { padding: 20px; }
-  .topbar { gap: 8px; }
   .brand-name { display: none; }
 }
 </style>
@@ -741,7 +241,6 @@ body::before {
 
 <div class="wrapper">
 
-  <!-- ── Topbar ── -->
   <div class="topbar fade-up">
     <div class="brand">
       <div class="brand-icon">🧠</div>
@@ -752,8 +251,7 @@ body::before {
     </div>
     <div class="topbar-right">
       <div class="status-pill">
-        <span class="status-dot"></span>
-        Live
+        <span class="status-dot"></span> Live
       </div>
       <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle theme">
         <span id="themeIcon">☀️</span>
@@ -761,13 +259,11 @@ body::before {
     </div>
   </div>
 
-  <!-- ── Hero ── -->
   <div class="hero fade-up">
     <h1>Tera<br><em>Digital Twin.</em></h1>
     <p>Tere moods, habits, aur vibes ke basis pe predict karta hai — tu kya karega.</p>
   </div>
 
-  <!-- ── Stats ── -->
   <div class="stats-row fade-up">
     <div class="stat-card">
       <div class="stat-num" id="stat-predictions">0</div>
@@ -783,19 +279,11 @@ body::before {
     </div>
   </div>
 
-<!-- Spotify Player -->
-<div class="spotify-container" style="margin-top: 25px; border: 1px solid #1DB954; border-radius: 15px; padding: 10px; background: #121212;">
-    <p style="color: #1DB954; font-weight: bold; margin-bottom: 8px;">🎵 Twin's Vibe Player</p>
-    <iframe style="border-radius:12px" 
-        src="{{ spotify_link }}" 
-        width="100%" height="152" 
-        frameBorder="0" allowfullscreen="" 
-        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
-        loading="lazy">
-    </iframe>
-</div>
+  <div class="media-container fade-up" style="border: 1px solid #1DB954; border-radius: 15px; padding: 10px; background: #121212; margin-bottom: 24px;">
+      <p style="color: #1DB954; font-weight: bold; margin-bottom: 8px;">🎵 Twin's Mood Vibe</p>
+      <iframe style="border-radius:12px" src="{{ spotify_link }}" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+  </div>
 
-  <!-- ── Section 1: Configure ── -->
   <div class="card fade-up">
     <div class="section-head">
       <div class="section-icon">👤</div>
@@ -810,7 +298,7 @@ body::before {
 
         <div class="field">
           <label class="field-label">Tera Naam</label>
-          <input type="text" name="name" class="field-input" placeholder="e.g. Arjun, Priya…">
+          <input type="text" name="name" class="field-input" placeholder="e.g. Ajay, Priya…">
         </div>
 
         <div class="field">
@@ -835,18 +323,18 @@ body::before {
 
         <div class="field">
           <label class="field-label">Favorite Color</label>
-          <input type="text" name="favorite_color" class="field-input" placeholder="e.g., Blue, Green, Red..." value="{{ favorite_color }}">
+          <input type="text" name="favorite_color" class="field-input" placeholder="e.g., Blue, Green..." value="{{ favorite_color }}">
         </div>
 
         <div class="field full">
           <label class="field-label">Personality & Hobbies</label>
-          <textarea name="personality_traits" class="field-textarea" placeholder="e.g. Introvert hoon, coding aur gaming karta hoon, tech mein interested hoon, procrastinator bhi hoon, chai addict…"></textarea>
+          <textarea name="personality_traits" class="field-textarea" placeholder="e.g. Introvert hoon, IoT aur Python coding me interest, cricket ka bada fan hoon, procrastinator bhi hoon…"></textarea>
         </div>
 
         <div class="field full">
           <label class="field-label">Life Abhi</label>
           <select name="life_phase" class="field-select">
-            <option value="student">📚 Student — padhai pressure mein</option>
+            <option value="student" selected>📚 B.Tech Student</option>
             <option value="job_seeker">🎯 Job dhundh raha hoon</option>
             <option value="working">💼 Job mein hoon</option>
             <option value="freelancer">💻 Freelancer / Startup</option>
@@ -899,7 +387,6 @@ body::before {
     </form>
   </div>
 
-  <!-- ── Section 1.5: Personality Training Dashboard ── -->
   <div class="card fade-up">
     <div class="section-head">
       <div class="section-icon">🎭</div>
@@ -915,35 +402,29 @@ body::before {
       
       <div class="form-grid">
 
-        <!-- Bot Nickname -->
         <div class="field full">
           <label class="field-label">💬 Twin Ka Naam</label>
-          <input type="text" name="bot_nickname" class="field-input" maxlength="50" placeholder='Apne AI ka nickname (e.g., "Ajay AI", "Mitra", "PaisaMitra")' value="{{ twin_settings.bot_nickname }}">
-          <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
-            Apne AI ka nickname define karo (e.g., "Ajay AI", "Mitra", "PaisaMitra")
-          </p>
+          <input type="text" name="bot_nickname" class="field-input" maxlength="50" placeholder='Apne AI ka nickname (e.g., "Ajay AI")' value="{{ twin_settings.bot_nickname }}">
         </div>
 
-        <!-- Tone Selection -->
         <div class="field full">
           <label class="field-label">🎤 Tone / Personality</label>
           <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 8px;">
-            <label style="display: flex; align-items: center; padding: 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; transition: all var(--transition);">
-              <input type="radio" name="tone_level" value="1" {% if twin_settings.tone_level == 1 %}checked{% endif %} style="cursor: pointer; margin-right: 8px;">
+            <label style="display: flex; align-items: center; padding: 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer;">
+              <input type="radio" name="tone_level" value="1" {% if twin_settings.tone_level == 1 %}checked{% endif %} style="margin-right: 8px;">
               <span style="font-size: 12px; color: var(--text);">🎩 Professional</span>
             </label>
-            <label style="display: flex; align-items: center; padding: 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; transition: all var(--transition);">
-              <input type="radio" name="tone_level" value="2" {% if twin_settings.tone_level == 2 %}checked{% endif %} style="cursor: pointer; margin-right: 8px;">
+            <label style="display: flex; align-items: center; padding: 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer;">
+              <input type="radio" name="tone_level" value="2" {% if twin_settings.tone_level == 2 %}checked{% endif %} style="margin-right: 8px;">
               <span style="font-size: 12px; color: var(--text);">😊 Casual</span>
             </label>
-            <label style="display: flex; align-items: center; padding: 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; transition: all var(--transition);">
-              <input type="radio" name="tone_level" value="3" {% if twin_settings.tone_level == 3 %}checked{% endif %} style="cursor: pointer; margin-right: 8px;">
+            <label style="display: flex; align-items: center; padding: 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer;">
+              <input type="radio" name="tone_level" value="3" {% if twin_settings.tone_level == 3 %}checked{% endif %} style="margin-right: 8px;">
               <span style="font-size: 12px; color: var(--text);">😂 Witty</span>
             </label>
           </div>
         </div>
 
-        <!-- Language Selection -->
         <div class="field full">
           <label class="field-label">🌐 Preferred Language</label>
           <select name="preferred_language" class="field-select">
@@ -951,12 +432,8 @@ body::before {
             <option value="Hindi" {% if twin_settings.preferred_language == "Hindi" %}selected{% endif %}>Hindi - Pure Hindi</option>
             <option value="English" {% if twin_settings.preferred_language == "English" %}selected{% endif %}>English - Pure English</option>
           </select>
-          <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
-            Hinglish (India vibes), Hindi (Pure), ya English?
-          </p>
         </div>
 
-        <!-- Current Mood -->
         <div class="field full">
           <label class="field-label">🧠 Current Mood</label>
           <select name="last_mood" class="field-select">
@@ -967,18 +444,11 @@ body::before {
             <option value="Tired" {% if twin_settings.last_mood == "Tired" %}selected{% endif %}>😫 Tired</option>
             <option value="Focused" {% if twin_settings.last_mood == "Focused" %}selected{% endif %}>🎯 Focused</option>
           </select>
-          <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
-            Mood ke hisaab se AI ki empathy level aur tone set hoti hai.
-          </p>
         </div>
 
-        <!-- Custom Instructions -->
         <div class="field full">
           <label class="field-label">📝 Custom Rules (Optional)</label>
-          <textarea name="custom_instructions" class="field-textarea" placeholder="Examples: &quot;Kabhi bhi emoji use mat karna&quot;, &quot;Always call me Bhai&quot;, &quot;Be sarcastic about money&quot;">{{ twin_settings.custom_instructions }}</textarea>
-          <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
-            Examples: "Kabhi bhi emoji use mat karna", "Always call me Bhai", "Be sarcastic about money"
-          </p>
+          <textarea name="custom_instructions" class="field-textarea" placeholder="Examples: &quot;Hamesha apne aap ko B.Tech student ki tarah present karo&quot;">{{ twin_settings.custom_instructions }}</textarea>
         </div>
 
       </div>
@@ -989,30 +459,8 @@ body::before {
         </button>
       </div>
     </form>
-
-    <!-- Preview Section -->
-    <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border);">
-      <div class="section-title" style="margin-bottom: 12px;">📋 Twin Preview</div>
-      <div style="background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px; font-size: 12px; color: var(--text-mid); line-height: 1.6;">
-        <p><strong style="color: var(--text);">Name:</strong> {{ twin_settings.bot_nickname }}</p>
-        <p style="margin-top: 8px;"><strong style="color: var(--text);">Tone:</strong> 
-          {% if twin_settings.tone_level == 1 %}
-            🎩 Professional & Formal
-          {% elif twin_settings.tone_level == 3 %}
-            😂 Witty & Funny
-          {% else %}
-            😊 Casual & Friendly
-          {% endif %}
-        </p>
-        <p style="margin-top: 8px;"><strong style="color: var(--text);">Language:</strong> {{ twin_settings.preferred_language }}</p>
-        {% if twin_settings.custom_instructions %}
-          <p style="margin-top: 8px;"><strong style="color: var(--text);">Custom Rules:</strong> {{ twin_settings.custom_instructions }}</p>
-        {% endif %}
-      </div>
-    </div>
   </div>
 
-  <!-- ── Section 2: Prediction ── -->
   <div class="card fade-up">
     <div class="section-head">
       <div class="section-icon teal">⚡</div>
@@ -1024,22 +472,19 @@ body::before {
 
     <div class="chat-area">
 
-      <!-- Scenario chips -->
       <div>
         <div class="chips-label">Quick Scenarios</div>
         <div class="chips" id="chipsContainer">
-          <div class="chip" onclick="fillChip(this)">😴 Subah 7 baje alarm, meeting 9 baje</div>
+          <div class="chip" onclick="fillChip(this)">😴 Subah 7 baje alarm, class 9 baje</div>
           <div class="chip" onclick="fillChip(this)">🌧️ Sunday barish, koi plan nahi</div>
           <div class="chip" onclick="fillChip(this)">💸 Mahine end mein paise khatam</div>
           <div class="chip" onclick="fillChip(this)">📱 Dost ne party bula, tu thaka</div>
           <div class="chip" onclick="fillChip(this)">🍕 Raat 2 baje bhook, kitchen khali</div>
           <div class="chip" onclick="fillChip(this)">📚 Exam kal, aaj kuch nahi padha</div>
-          <div class="chip" onclick="fillChip(this)">💼 Boss ne weekend kaam diya</div>
-          <div class="chip" onclick="fillChip(this)">🎮 Assignment pending, game launch ho gayi</div>
+          <div class="chip" onclick="fillChip(this)">💻 Backend API error de rahi hai, debug karna hai</div>
         </div>
       </div>
 
-      <!-- Mood -->
       <div>
         <div class="chips-label" style="margin-bottom: 8px;">Abhi mood kaisa hai?</div>
         <div class="mood-row">
@@ -1053,14 +498,13 @@ body::before {
         <input type="hidden" id="moodInput" value="">
       </div>
 
-      <!-- Scenario input -->
       <div>
         <div class="chips-label" style="margin-bottom: 6px;">Scenario / Situation</div>
         <div class="textarea-wrap">
           <textarea
             id="scenarioInput"
             class="field-textarea"
-            placeholder="Jitna detail de sake, utna better… e.g. Raat ke 11 baj rahe hain, kal presentation hai, kuch ready nahi, aur yaar log movie dekhne bula rahe hain…"
+            placeholder="Jitna detail de sake, utna better… e.g. Raat ke 11 baj rahe hain, kal project presentation hai, aur abhi tak Groq API set nahi hui…"
             maxlength="300"
             oninput="updateChar(this)"
             style="min-height: 110px; padding-bottom: 28px;"
@@ -1072,7 +516,6 @@ body::before {
         </p>
       </div>
 
-      <!-- Buttons -->
       <div class="btn-row">
         <button class="btn-primary" id="predictBtn" onclick="getPrediction()">
           <span>✦</span> Digital Twin Se Pucho
@@ -1080,13 +523,47 @@ body::before {
         <button class="btn-icon" onclick="clearAll()" title="Clear">✕</button>
       </div>
 
-      <!-- Output Area -->
       <div id="outputArea"></div>
 
     </div>
   </div>
 
-  <!-- ── Section 3: History (initially hidden) ── -->
+  <div class="card fade-up">
+    <div class="section-head">
+      <div class="section-icon red">⚔️</div>
+      <div>
+        <div class="section-title">AI vs AI Debate Mode</div>
+        <div class="section-sub">Tere Twin ko doosre AI characters se lada kar dekh</div>
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <div class="field">
+        <label class="field-label">Kisse Ladna Hai?</label>
+        <select id="opponentSelect" class="field-select" style="border-color: #ff4757;">
+          <option value="Strict Professor">👨‍🏫 Strict B.Tech Professor</option>
+          <option value="Shahrukh Khan">😎 Shahrukh Khan (SRK Style)</option>
+          <option value="Sharma Ji">👴 Padosi Sharma Ji</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Behas ka Topic</label>
+        <input type="text" id="debateTopic" class="field-input" placeholder="e.g. Exam me ChatGPT ka use karna chahiye ya nahi?">
+      </div>
+    </div>
+
+    <div style="margin-top: 20px;">
+      <button class="btn-primary" id="startDebateBtn" onclick="startDebate()" style="background: #ff4757; color: white; width: 100%; justify-content: center;">
+        <span>🔥</span> Fight Start Kar
+      </button>
+    </div>
+
+    <div id="debateArea" style="margin-top: 24px; display: flex; flex-direction: column; gap: 14px; background: var(--surface2); border-radius: 12px; padding: 15px; min-height: 100px;">
+      <p style="text-align: center; color: var(--text-muted); font-size: 13px; margin: auto;">Debate script yahan play hogi...</p>
+    </div>
+  </div>
+
   <div class="card fade-up" id="historyCard" style="display: none;">
     <div class="section-head">
       <div class="section-icon orange">🕐</div>
@@ -1123,7 +600,6 @@ function toggleTheme() {
   const current = document.documentElement.getAttribute('data-theme');
   setTheme(current === 'dark' ? 'light' : 'dark');
 }
-
 function setTheme(t) {
   document.documentElement.setAttribute('data-theme', t);
   document.getElementById('themeIcon').textContent = t === 'dark' ? '☀️' : '🌙';
@@ -1135,7 +611,6 @@ function animateStats() {
   animNum('stat-predictions', predictions);
   animNum('stat-streak', streak);
 }
-
 function animNum(id, target) {
   if (!target) return;
   const el = document.getElementById(id);
@@ -1155,13 +630,10 @@ function loadPrefs() {
   if (p.name) document.querySelector('[name="name"]').value = p.name;
   if (p.sleep_cycle) document.querySelector('[name="sleep_cycle"]').value = p.sleep_cycle;
   if (p.diet_preference) document.querySelector('[name="diet_preference"]').value = p.diet_preference;
-  if (p.energy_level) document.querySelector('[name="energy_level"]').value = p.energy_level;
   if (p.personality_traits) document.querySelector('[name="personality_traits"]').value = p.personality_traits;
   if (p.life_phase) document.querySelector('[name="life_phase"]').value = p.life_phase;
   if (p.brutal_mode) document.querySelector('[name="brutal_mode"]').checked = true;
-  if (p.night_mode_personality) document.querySelector('[name="night_mode_personality"]').checked = true;
 }
-
 function handlePrefSubmit(e) {
   e.preventDefault();
   const fd = new FormData(e.target);
@@ -1173,18 +645,13 @@ function handlePrefSubmit(e) {
   showToast('Preferences saved!');
 }
 
-// ── Enter key: submit on Enter, newline on Shift+Enter ──
+// ── UI Helpers ──
 function setupEnterKey() {
   const ta = document.getElementById('scenarioInput');
   ta.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      if (this.value.trim()) getPrediction();
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (this.value.trim()) getPrediction(); }
   });
 }
-
-// ── Chips ──
 function fillChip(el) {
   document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
@@ -1195,47 +662,23 @@ function fillChip(el) {
   ta.focus();
   updateChar(ta);
 }
-
-// ── Char counter ──
-function updateChar(el) {
-  document.getElementById('charCount').textContent = el.value.length + ' / 300';
-}
-
-// ── Clear ──
+function updateChar(el) { document.getElementById('charCount').textContent = el.value.length + ' / 300'; }
 function clearAll() {
   document.getElementById('scenarioInput').value = '';
   document.getElementById('charCount').textContent = '0 / 300';
-  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-  document.querySelectorAll('.mood-pill').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.chip, .mood-pill').forEach(c => c.classList.remove('active'));
   document.getElementById('moodInput').value = '';
   currentMood = '';
   document.getElementById('outputArea').innerHTML = '';
 }
-
-// ── Mood ──
 function selectMood(el) {
   document.querySelectorAll('.mood-pill').forEach(p => p.classList.remove('active'));
   el.classList.add('active');
   currentMood = el.dataset.mood;
   document.getElementById('moodInput').value = currentMood;
 }
-// ── CSRF Token Function (Django ko security ke liye chahiye) ──
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
 
-// ── Main Prediction (Updated for Django Backend) ──
+// ── Main Prediction (Django CSRF) ──
 async function getPrediction() {
   const scenario = document.getElementById('scenarioInput').value.trim();
   if (!scenario) { showToast('Pehle scenario likho! ✍️'); return; }
@@ -1243,50 +686,6 @@ async function getPrediction() {
   const btn = document.getElementById('predictBtn');
   btn.disabled = true;
   btn.innerHTML = '<span class="typing-indicator"><span></span><span></span><span></span></span> Twin soch raha hai…';
-
-  showTyping();
-
-  try {
-    // Apne Django backend ko data bhej rahe hain
-    const formData = new FormData();
-    formData.append('scenario', scenario);
-    formData.append('get_prediction', 'true'); // Backend logic trigger karne ke liye
-
-    const res = await fetch('/', {
-      method: 'POST',
-      headers: {
-        'X-CSRFToken': getCookie('csrftoken'),
-        'X-Requested-With': 'XMLHttpRequest' // Django ko batane ke liye ki ye AJAX call hai
-      },
-      body: formData
-    });
-
-    if (!res.ok) throw new Error('Backend error ' + res.status);
-    
-    // Django se aaya JSON response
-    const data = await res.json();
-    const text = data.prediction;
-
-    showOutput(text, scenario);
-    savePrediction(scenario, text);
-
-  } catch (err) {
-    showError(err.message);
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = '<span>✦</span> Digital Twin Se Pucho';
-  }
-}
-// ── Main Prediction ──
-// ── Main Prediction (Super Safe Django CSRF Version) ──
-async function getPrediction() {
-  const scenario = document.getElementById('scenarioInput').value.trim();
-  if (!scenario) { showToast('Pehle scenario likho! ✍️'); return; }
-
-  const btn = document.getElementById('predictBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="typing-indicator"><span></span><span></span><span></span></span> Twin soch raha hai…';
-
   showTyping();
 
   try {
@@ -1294,26 +693,17 @@ async function getPrediction() {
     formData.append('scenario', scenario);
     formData.append('get_prediction', 'true');
 
-    // window.location.href se exact current URL par hit hoga
     const res = await fetch(window.location.href, {
       method: 'POST',
-      headers: {
-        'X-CSRFToken': '{{ csrf_token }}', // Django direct token dega yahan
-        'X-Requested-With': 'XMLHttpRequest'
-      },
+      headers: { 'X-CSRFToken': '{{ csrf_token }}', 'X-Requested-With': 'XMLHttpRequest' },
       body: formData
     });
 
     if (!res.ok) throw new Error('Django Backend Error: ' + res.status);
-    
     const data = await res.json();
-    const text = data.prediction;
-
-    showOutput(text, scenario);
-    savePrediction(scenario, text);
-
+    showOutput(data.prediction, scenario);
+    savePrediction(scenario, data.prediction);
   } catch (err) {
-    console.error("Fetch Error: ", err); // Browser console mein actual error dikhega
     showError(err.message);
   } finally {
     btn.disabled = false;
@@ -1321,128 +711,128 @@ async function getPrediction() {
   }
 }
 
-function buildPrompt(prefs, scenario) {
-  const name = prefs.name || 'User';
-  const sleep = prefs.sleep_cycle || 'night_owl';
-  const diet = prefs.diet_preference || 'nonveg';
-  const energy = prefs.energy_level || 'medium';
-  const personality = prefs.personality_traits || 'typical Indian young adult';
-  const life = prefs.life_phase || 'student';
-  const brutal = prefs.brutal_mode === true || prefs.brutal_mode === 'on';
-  const nightMode = prefs.night_mode_personality === true || prefs.night_mode_personality === 'on';
-  const hour = new Date().getHours();
-  const isNight = hour >= 22 || hour < 5;
-
-  let style = brutal
-    ? 'Bilkul seedha bol, no sugar-coating, dost jaisi baat kar thodi harsh tone ke saath.'
-    : 'Dost ki tarah baat kar, samajhdaar aur relatable tone.';
-
-  if (nightMode && isNight) style += ' Raat ka time hai toh thodi alag vibe — honest aur introspective.';
-
-  const moodCtx = currentMood ? `Abhi mood: ${currentMood}.` : '';
-
-  return `Tu ek AI digital twin hai jo exactly ${name} ki tarah sochta hai.
-
-Personality profile:
-- Neend: ${sleep}
-- Diet: ${diet}
-- Energy: ${energy}
-- Personality & hobbies: ${personality}
-- Life phase: ${life}
-${moodCtx}
-
-Communication style: ${style}
-
-Situation / Scenario:
-"${scenario}"
-
-Pehle first-person mein predict kar — exactly kya karega ${name} is situation mein. 2-4 sentences. Hindi-English mix theek hai (Hinglish). Phir ek line mein honest self-awareness add kar. Short, punchy, human.`;
-}
-
 function showTyping() {
   document.getElementById('outputArea').innerHTML = `
     <div class="output-card" style="animation: fadeUp 0.3s ease;">
-      <div class="output-header">
-        <div class="output-tag"><span class="status-dot"></span> Twin soch raha hai…</div>
-      </div>
-      <div class="typing-indicator" style="margin-top: 8px;">
-        <span></span><span></span><span></span>
-      </div>
-    </div>
-  `;
+      <div class="output-header"><div class="output-tag"><span class="status-dot"></span> Twin soch raha hai…</div></div>
+      <div class="typing-indicator" style="margin-top: 8px;"><span></span><span></span><span></span></div>
+    </div>`;
 }
 
 function showOutput(text, scenario) {
   const hour = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
   document.getElementById('outputArea').innerHTML = `
     <div class="output-card" id="outCard" style="animation: fadeUp 0.4s ease;">
-      <div class="output-card-line"></div>
       <div class="output-header">
         <div class="output-tag"><span class="status-dot"></span> Twin Response</div>
         <button class="copy-btn" onclick="copyText()">📋 Copy</button>
       </div>
       <p class="output-text" id="outText">${escapeHtml(text)}</p>
       <div class="output-footer">
-
         <span class="meta-item">🕐 ${hour}</span>
-        <span class="meta-item" style="margin-left: auto; cursor: pointer; color: var(--accent2);" onclick="bookmarkCurrent()">🔖 Save</span>
+        <span class="meta-item" style="margin-left: auto; cursor: pointer; color: var(--accent2);" onclick="showToast('Saved! 🔖')">🔖 Save</span>
       </div>
     </div>
     <div class="reaction-row">
       <div class="mood-pill" onclick="reactTo('accurate', this)">✅ Bilkul sahi</div>
       <div class="mood-pill" onclick="reactTo('close', this)">🤏 Kuch kuch sahi</div>
       <div class="mood-pill" onclick="reactTo('wrong', this)">❌ Nahi yaar</div>
-    </div>
-  `;
+    </div>`;
   document.getElementById('outCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function showError(msg) {
-  document.getElementById('outputArea').innerHTML = `
-    <div class="output-card" style="border-color: rgba(241,112,53,0.3);">
-      <p style="color: var(--accent3); font-size: 14px;">⚠️ Kuch hua nahi — ${msg}</p>
-      <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">API key check karo ya dobara try karo.</p>
-    </div>
-  `;
+  document.getElementById('outputArea').innerHTML = `<div class="output-card"><p style="color: var(--accent3);">⚠️ ${msg}</p></div>`;
 }
 
-// ── Copy ──
+// ── 🔥 Debate System 🔥 ──
+async function startDebate() {
+  const topic = document.getElementById('debateTopic').value.trim();
+  const opponent = document.getElementById('opponentSelect').value;
+  
+  if (!topic) { showToast('Bhai pehle behas ka topic likh! 🥊'); return; }
+
+  const btn = document.getElementById('startDebateBtn');
+  const area = document.getElementById('debateArea');
+  
+  btn.disabled = true;
+  btn.innerHTML = '<span>⏳</span> Script likh raha hai...';
+  area.innerHTML = '<div class="typing-indicator" style="margin: auto;"><span></span><span></span><span></span></div>';
+
+  try {
+    const formData = new FormData();
+    formData.append('get_debate', 'true');
+    formData.append('topic', topic);
+    formData.append('opponent', opponent);
+
+    const res = await fetch(window.location.href, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': '{{ csrf_token }}', 'X-Requested-With': 'XMLHttpRequest' },
+      body: formData
+    });
+
+    const data = await res.json();
+    area.innerHTML = ''; 
+
+    // Dialogue playback with delay
+    data.script.forEach((line, index) => {
+      setTimeout(() => {
+        const isTwin = line.speaker === "Twin";
+        const align = isTwin ? 'flex-end' : 'flex-start';
+        const bgColor = isTwin ? 'var(--accent-dim)' : 'var(--surface)';
+        const borderColor = isTwin ? 'var(--accent)' : '#ff4757';
+        const nameColor = isTwin ? 'var(--accent)' : '#ff4757';
+        
+        const bubble = document.createElement('div');
+        bubble.style.cssText = `
+          align-self: ${align}; 
+          background: ${bgColor}; 
+          border: 1px solid ${borderColor}; 
+          padding: 12px 16px; 
+          border-radius: 12px; 
+          max-width: 85%;
+          animation: fadeUp 0.4s ease;
+        `;
+        bubble.innerHTML = `
+          <div style="font-size: 11px; font-weight: bold; color: ${nameColor}; margin-bottom: 4px; text-transform: uppercase;">
+            ${isTwin ? '🤖 Mera Twin' : '🥊 ' + opponent}
+          </div>
+          <div style="font-size: 14px; line-height: 1.5; color: var(--text);">${line.text}</div>
+        `;
+        area.appendChild(bubble);
+        area.scrollTop = area.scrollHeight; 
+      }, index * 1800); 
+    });
+
+  } catch (err) {
+    area.innerHTML = '<p style="color: red; text-align:center;">API me kuch lafda ho gaya bhai!</p>';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span>🔥</span> Fight Start Kar';
+  }
+}
+
+// ── Misc Helpers ──
 function copyText() {
   const t = document.getElementById('outText');
-  if (!t) return;
-  navigator.clipboard.writeText(t.textContent).then(() => showToast('Copied! 📋'));
+  if (t) navigator.clipboard.writeText(t.textContent).then(() => showToast('Copied! 📋'));
 }
-
-// ── Reaction ──
 function reactTo(type, el) {
   document.querySelectorAll('.reaction-row .mood-pill').forEach(p => p.classList.remove('active'));
   el.classList.add('active');
-  const msgs = {
-    accurate: '🎯 Nice! Twin sahi tha.',
-    close: '🤏 Close tha, better karega.',
-    wrong: '📝 Noted — agle baar improve karega.'
-  };
+  const msgs = { accurate: '🎯 Nice!', close: '🤏 Close tha.', wrong: '📝 Noted.' };
   setTimeout(() => showToast(msgs[type]), 100);
 }
-
-function bookmarkCurrent() {
-  showToast('Saved to history! 🔖');
-}
-
-// ── Save to localStorage history ──
 function savePrediction(scenario, prediction) {
   predictions++;
   localStorage.setItem('dt_predictions', predictions);
   document.getElementById('stat-predictions').textContent = predictions;
-
   const entry = { scenario, prediction, time: Date.now() };
   history.unshift(entry);
   if (history.length > 10) history.pop();
   localStorage.setItem('dt_history', JSON.stringify(history));
   renderHistory();
 }
-
-// ── Render history ──
 function renderHistory() {
   if (!history.length) return;
   const card = document.getElementById('historyCard');
@@ -1459,28 +849,14 @@ function renderHistory() {
     </div>
   `).join('');
 }
-
-// ── Toast ──
 function showToast(msg) {
   const t = document.createElement('div');
-  t.style.cssText = `
-    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
-    background: var(--surface); border: 1px solid var(--border-hover);
-    color: var(--text); font-family: var(--font); font-size: 13px; font-weight: 500;
-    padding: 10px 20px; border-radius: 999px; z-index: 9999;
-    animation: fadeUp 0.3s ease;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-  `;
+  t.style.cssText = `position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); background: var(--surface); border: 1px solid var(--border-hover); color: var(--text); padding: 10px 20px; border-radius: 999px; z-index: 9999; animation: fadeUp 0.3s ease; box-shadow: 0 8px 24px rgba(0,0,0,0.3);`;
   t.textContent = msg;
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 2400);
 }
-
-// ── Helpers ──
-function escapeHtml(str) {
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
+function escapeHtml(str) { return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function timeAgo(ts) {
   const d = Date.now() - ts;
   if (d < 60000) return 'just now';

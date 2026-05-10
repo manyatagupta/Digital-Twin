@@ -49,66 +49,33 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 
-body {
-  font-family: var(--font);
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  overflow-x: hidden;
-  transition: background var(--transition), color var(--transition);
-}
+body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; transition: background var(--transition), color var(--transition); }
 
 /* Grid BG */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(200,241,53,0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(200,241,53,0.025) 1px, transparent 1px);
-  background-size: 48px 48px;
-  pointer-events: none;
-  z-index: 0;
-  opacity: 1;
-  transition: opacity var(--transition);
-}
+body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(200,241,53,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(200,241,53,0.025) 1px, transparent 1px); background-size: 48px 48px; pointer-events: none; z-index: 0; opacity: 1; transition: opacity var(--transition); }
 [data-theme="light"] body::before { opacity: 0; }
 
 /* Subtle orb */
-.orb {
-  position: fixed;
-  border-radius: 50%;
-  filter: blur(90px);
-  pointer-events: none;
-  z-index: 0;
-  transition: opacity var(--transition);
-}
+.orb { position: fixed; border-radius: 50%; filter: blur(90px); pointer-events: none; z-index: 0; transition: opacity var(--transition); }
 .orb-1 { width: 420px; height: 420px; background: #c8f135; top: -160px; left: -120px; opacity: 0.07; }
 .orb-2 { width: 320px; height: 320px; background: #35f1c8; bottom: -120px; right: -80px; opacity: 0.06; }
 [data-theme="light"] .orb { opacity: 0 !important; }
 
 /* ── Layout ── */
-.wrapper {
-  position: relative;
-  z-index: 1;
-  max-width: 840px;
-  margin: 0 auto;
-  padding: 40px 20px 80px;
-}
+.wrapper { position: relative; z-index: 1; max-width: 840px; margin: 0 auto; padding: 40px 20px 80px; }
 
 /* ── Topbar ── */
-.topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 48px;
-}
-
+.topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 48px; }
 .brand { display: flex; align-items: center; gap: 10px; }
 .brand-icon { width: 36px; height: 36px; border-radius: 10px; background: var(--accent-dim); border: 1px solid var(--border-hover); display: flex; align-items: center; justify-content: center; font-size: 17px; }
 .brand-name { font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: -0.3px; }
 .brand-tag { font-size: 11px; color: var(--text-muted); font-weight: 400; }
 .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+/* Profile Button */
+.profile-btn { font-size: 13px; font-weight: 600; color: var(--text); background: var(--surface2); padding: 8px 16px; border-radius: 99px; border: 1px solid var(--border); cursor: pointer; transition: all var(--transition); display: flex; align-items: center; gap: 6px; font-family: var(--font); }
+.profile-btn:hover { background: var(--surface3); border-color: var(--accent); color: var(--accent); }
+
 .theme-btn { width: 38px; height: 38px; border-radius: var(--radius-sm); background: var(--surface); border: 1px solid var(--border); cursor: pointer; color: var(--text-mid); font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all var(--transition); }
 .theme-btn:hover { border-color: var(--border-hover); color: var(--text); }
 
@@ -130,11 +97,12 @@ body::before {
 .stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.2px; font-weight: 500; }
 
 /* ── Card ── */
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; margin-bottom: 16px; transition: border-color var(--transition), background var(--transition); }
+/* Added a tighter margin for cards to reduce gaps */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 16px; transition: border-color var(--transition), background var(--transition); }
 .card:hover { border-color: rgba(255,255,255,0.1); }
 
 /* ── Section Header ── */
-.section-head { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+.section-head { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
 .section-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--accent-dim); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
 .section-icon.teal { background: rgba(53,241,200,0.1); }
 .section-icon.orange { background: rgba(241,112,53,0.1); }
@@ -155,7 +123,7 @@ body::before {
 .field-input:focus, .field-select:focus, .field-textarea:focus { border-color: var(--border-hover); background: var(--surface3); }
 
 /* ── Divider & Toggle ── */
-.divider { display: flex; align-items: center; gap: 14px; margin: 22px 0; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); }
+.divider { display: flex; align-items: center; gap: 14px; margin: 20px 0; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); }
 .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
 .toggle-row:last-of-type { border-bottom: none; }
@@ -169,10 +137,14 @@ body::before {
 .toggle input:checked + .toggle-slider::before { left: 23px; background: var(--accent); }
 
 /* ── Buttons ── */
-.btn-primary { background: var(--accent); color: #0a0b0f; font-family: var(--font); font-size: 13px; font-weight: 700; letter-spacing: 0.5px; border: none; border-radius: var(--radius-sm); padding: 13px 24px; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px; }
+.btn-primary { background: var(--accent); color: #0a0b0f; font-family: var(--font); font-size: 13px; font-weight: 700; letter-spacing: 0.5px; border: none; border-radius: var(--radius-sm); padding: 13px 24px; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
 .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
 .btn-primary:active { transform: translateY(0); opacity: 1; }
 .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.btn-danger { background: rgba(255, 71, 87, 0.1); color: #ff4757; font-family: var(--font); font-size: 13px; font-weight: 600; border: 1px solid rgba(255, 71, 87, 0.3); border-radius: var(--radius-sm); padding: 11px 20px; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px; justify-content: center; width: 100%; margin-top: 15px; }
+.btn-danger:hover { background: rgba(255, 71, 87, 0.2); border-color: #ff4757; }
+
 .btn-secondary { background: transparent; border: 1px solid var(--border); color: var(--text-mid); font-family: var(--font); font-size: 13px; font-weight: 500; border-radius: var(--radius-sm); padding: 11px 20px; cursor: pointer; transition: all var(--transition); display: inline-flex; align-items: center; gap: 8px; }
 .btn-secondary:hover { border-color: var(--border-hover); color: var(--text); background: var(--accent-dim); }
 .btn-icon { background: var(--surface2); border: 1px solid var(--border); color: var(--text-mid); border-radius: var(--radius-sm); width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 15px; transition: all var(--transition); }
@@ -194,7 +166,7 @@ body::before {
 /* ── Roast-o-Meter ── */
 #roastMeterContainer { display: none; margin-top: 20px; background: var(--surface3); padding: 15px; border-radius: var(--radius-sm); border: 1px solid var(--border); }
 .meter-bar { width: 100%; height: 8px; background: var(--bg); border-radius: 10px; overflow: hidden; margin-top: 8px; border: 1px solid var(--border); }
-.meter-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #f1c40f, #e67e22, #e74c3c); transition: width 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.meter-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #35f1c8, #f1c40f, #e74c3c); transition: width 1s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
 /* ── Output Card ── */
 .output-card { background: var(--surface2); border: 1px solid var(--border-hover); border-radius: var(--radius); padding: 24px; position: relative; overflow: hidden; margin-top: 16px; }
@@ -230,6 +202,17 @@ body::before {
 .fade-up:nth-child(4) { animation-delay: 0.24s; }
 .fade-up:nth-child(5) { animation-delay: 0.32s; }
 
+/* ── Profile Modal Styles ── */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 1000; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
+.modal-overlay.active { opacity: 1; visibility: visible; }
+.modal-content { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); width: 90%; max-width: 400px; padding: 24px; box-shadow: var(--shadow); transform: scale(0.95); transition: all 0.3s ease; }
+.modal-overlay.active .modal-content { transform: scale(1); }
+.modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border); }
+.profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
+.p-card { background: var(--surface2); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); }
+.p-label { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 4px; }
+.p-val { font-size: 14px; font-weight: 600; color: var(--text); }
+
 @media (max-width: 600px) {
   .form-grid { grid-template-columns: 1fr; }
   .stats-row { grid-template-columns: 1fr 1fr; }
@@ -250,11 +233,15 @@ body::before {
     <div class="brand">
       <div class="brand-icon">🧠</div>
       <div>
-        <div class="brand-name">Digital Twin</div>
-        <div class="brand-tag">AI Doppelganger</div>
+        <div class="brand-name">Digital Twin by Manya & Ajay</div>
+        <div class="brand-tag">{{ twin_settings.bot_nickname|default:"AI Doppelganger" }}</div>
       </div>
     </div>
     <div class="topbar-right">
+      <button class="profile-btn" onclick="openProfileModal()">
+        👤 {{ user.username|default:"Ajay" }}/twin
+      </button>
+      
       <div class="status-pill">
         <span class="status-dot"></span> Live
       </div>
@@ -284,9 +271,9 @@ body::before {
     </div>
   </div>
 
-  <div class="card fade-up" style="padding: 12px; border-color: #1DB954;">
+  <div class="card fade-up" style="padding: 12px; border-color: #1DB954; margin-bottom: 24px;">
       <p style="color: #1DB954; font-weight: bold; margin-bottom: 8px; font-size: 13px;">🎵 Twin's Mood Vibe</p>
-      <iframe style="border-radius:12px" src="{{ spotify_link }}" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+      <iframe style="border-radius:12px" src="{{ spotify_link|default:'https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM5M?utm_source=generator' }}" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
   </div>
 
   <div class="card fade-up">
@@ -358,17 +345,6 @@ body::before {
         </div>
         <label class="toggle">
           <input type="checkbox" name="brutal_mode" id="brutalMode">
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-
-      <div class="toggle-row">
-        <div class="toggle-info">
-          <h4>Night Mode Personality</h4>
-          <p>Raat ke time alag vibes — jaise actually hota hai</p>
-        </div>
-        <label class="toggle">
-          <input type="checkbox" name="night_mode_personality">
           <span class="toggle-slider"></span>
         </label>
       </div>
@@ -486,7 +462,6 @@ body::before {
           <div class="chip" onclick="fillChip(this)">📱 Dost ne party bula, tu thaka</div>
           <div class="chip" onclick="fillChip(this)">🍕 Raat 2 baje bhook, kitchen khali</div>
           <div class="chip" onclick="fillChip(this)">📚 Exam kal, aaj kuch nahi padha</div>
-          <div class="chip" onclick="fillChip(this)">💻 Backend API error de rahi hai, debug karna hai</div>
         </div>
       </div>
 
@@ -590,6 +565,53 @@ body::before {
 
 </div>
 
+<div id="profileModal" class="modal-overlay" onclick="if(event.target === this) closeProfileModal()">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div class="brand-icon" style="width: 50px; height: 50px; font-size: 24px; background: var(--surface2);">👤</div>
+        <div>
+          <h3 style="margin:0; font-size: 18px; color: var(--text);">{{ user.username|default:"Ajay" }}'s Profile</h3>
+          <p style="margin: 4px 0 0 0; font-size: 12px; color: var(--accent);">B.Tech CS / AI Developer</p>
+        </div>
+      </div>
+      <button class="btn-icon" onclick="closeProfileModal()" style="border:none; background:transparent; margin-top:-5px;">✕</button>
+    </div>
+    
+    <div class="profile-grid">
+      <div class="p-card">
+        <span class="p-label">Twin Nickname</span>
+        <span class="p-val" id="prof-twin-name">{{ twin_settings.bot_nickname|default:"Not Set" }}</span>
+      </div>
+      <div class="p-card">
+        <span class="p-label">Current Mood</span>
+        <span class="p-val" id="prof-mood">{{ twin_settings.last_mood|default:"Chill" }}</span>
+      </div>
+      <div class="p-card">
+        <span class="p-label">Language</span>
+        <span class="p-val">{{ twin_settings.preferred_language|default:"Hinglish" }}</span>
+      </div>
+      <div class="p-card">
+        <span class="p-label">Predictions Used</span>
+        <span class="p-val" id="prof-preds-count">0</span>
+      </div>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+      <span class="p-label" style="margin-bottom: 6px;">Core Personality Traits</span>
+      <div style="background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; font-size: 13px; color: var(--text-mid); line-height: 1.5;" id="prof-traits-text">
+        Loading traits...
+      </div>
+    </div>
+    
+    <a href="/logout/" style="text-decoration: none;">
+      <button class="btn-danger">
+        <span>🚪</span> Logout from Twin
+      </button>
+    </a>
+  </div>
+</div>
+
 <script>
 // ── State ──
 let currentMood = '';
@@ -606,6 +628,9 @@ document.addEventListener('DOMContentLoaded', () => {
   setupEnterKey();
   const saved = localStorage.getItem('dt_theme');
   if (saved === 'light') setTheme('light');
+  
+  // Update Profile Modal values
+  document.getElementById('prof-preds-count').textContent = predictions;
 });
 
 // ── Theme ──
@@ -617,6 +642,26 @@ function setTheme(t) {
   document.documentElement.setAttribute('data-theme', t);
   document.getElementById('themeIcon').textContent = t === 'dark' ? '☀️' : '🌙';
   localStorage.setItem('dt_theme', t);
+}
+
+// ── Profile Modal Functions ──
+function openProfileModal() {
+  const modal = document.getElementById('profileModal');
+  const prefs = JSON.parse(localStorage.getItem('dt_prefs') || '{}');
+  const traitsBox = document.getElementById('prof-traits-text');
+  
+  if (prefs.personality_traits) {
+      traitsBox.textContent = prefs.personality_traits;
+  } else {
+      traitsBox.textContent = "No personality traits set yet. Fill the configuration form!";
+  }
+  
+  document.getElementById('prof-preds-count').textContent = predictions;
+  modal.classList.add('active');
+}
+
+function closeProfileModal() {
+  document.getElementById('profileModal').classList.remove('active');
 }
 
 // ── Stats animation ──
@@ -692,7 +737,7 @@ function selectMood(el) {
   document.getElementById('moodInput').value = currentMood;
 }
 
-// ── Main Prediction & Roast-o-Meter ──
+// ── Main Prediction & DYNAMIC Roast-o-Meter ──
 async function getPrediction() {
   const scenario = document.getElementById('scenarioInput').value.trim();
   if (!scenario) { showToast('Pehle scenario likho! ✍️'); return; }
@@ -717,7 +762,7 @@ async function getPrediction() {
     const data = await res.json();
     
     showOutput(data.prediction, scenario);
-    triggerRoastMeter(data.prediction);
+    triggerRoastMeter(data.prediction); // Triggering the smarter logic
     savePrediction(scenario, data.prediction);
     
   } catch (err) {
@@ -758,6 +803,7 @@ function showOutput(text, scenario) {
   document.getElementById('outCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
+// 🟢 SMARTER & MORE DYNAMIC ROAST-O-METER LOGIC
 function triggerRoastMeter(text) {
   const container = document.getElementById('roastMeterContainer');
   const bar = document.getElementById('roastBar');
@@ -765,24 +811,43 @@ function triggerRoastMeter(text) {
   
   container.style.display = 'block';
   
-  let score = 30; // Base score
-  const savageWords = ['soja', 'bhai', 'abe', 'gadhe', 'procrastinator', 'sharam', 'padh', 'reels', 'beta', 'kya kar raha hai'];
-  savageWords.forEach(w => { if(text.toLowerCase().includes(w)) score += 12; });
-  if (text.length > 120) score += 10;
+  let score = 15 + Math.floor(Math.random() * 20); 
+  
+  const savageWords = [
+      'soja', 'bhai', 'abe', 'gadhe', 'procrastinator', 'sharam', 
+      'padh', 'reels', 'beta', 'kya kar raha hai', 'chup', 'bakwas', 
+      'roast', 'loser', 'fail', 'moti', 'patla', 'soch', 'nalla', 
+      'nalli', 'timepass', 'bekar', 'gyaan', 'muh'
+  ];
+  
+  savageWords.forEach(w => { 
+      if(text.toLowerCase().includes(w)) score += 18; 
+  });
+  
+  if (text.includes('!')) score += 15;
+  if (text.includes('?')) score += 10;
+  if (text.length > 150) score += 20;
   
   score = Math.min(score, 100);
   
-  bar.style.width = '0%'; // Reset first
+  bar.style.width = '0%'; 
+  bar.style.transition = 'none';
+  
   setTimeout(() => {
+    bar.style.transition = 'width 1s cubic-bezier(0.175, 0.885, 0.32, 1.275)'; 
     bar.style.width = score + '%';
-    if(score < 50) status.innerText = "CHILL 😊";
-    else if(score < 80) status.innerText = "SAVAGE 💀";
-    else status.innerText = "BRUTAL DESTRUCTION 🌋";
-  }, 100);
-}
-
-function showError(msg) {
-  document.getElementById('outputArea').innerHTML = `<div class="output-card"><p style="color: var(--accent3);">⚠️ ${msg}</p></div>`;
+    
+    if(score < 45) {
+        status.innerText = "CHILL 😊";
+        status.style.color = "#35f1c8";
+    } else if(score < 75) {
+        status.innerText = "SAVAGE 💀";
+        status.style.color = "#f1c40f";
+    } else {
+        status.innerText = "BRUTAL DESTRUCTION 🌋";
+        status.style.color = "#e74c3c";
+    }
+  }, 50);
 }
 
 // ── 🔥 Debate System 🔥 ──

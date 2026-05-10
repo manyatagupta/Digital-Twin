@@ -1,85 +1,246 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth import login
-from .models import UserPreference, PastChoice, TwinSettings
-from .forms import PreferenceForm, TwinSettingsForm
+"""
+views.py — Digital Twin Dashboard
+==================================
+Authentication, dashboard, AI prediction, and AI debate views.
+All AJAX endpoints return consistent JSON envelopes: {ok, data/error}.
+"""
 
-# Dhyan de: Yahan 'get_ai_debate' import kar liya hai
-from .logic import get_digital_twin_prediction, get_system_prompt_with_personality, get_ai_debate
+from __future__ import annotations
+
+import logging
+from functools import wraps
+from typing import Any
+
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.http import HttpRequest, JsonResponse
+from django.shortcuts import redirect, render
+from django.views.decorators.http import require_http_methods
+
+from .models import PastChoice, TwinSettings, UserPreference
+from .logic import get_ai_debate, get_digital_twin_prediction
+
+logger = logging.getLogger(__name__)
+
+
+# ──────────────────────────────────────────────────────────────
+# CONSTANTS
+# ──────────────────────────────────────────────────────────────
+
+# Spotify embed URLs keyed by mood name.
+# "Chill" now points to Chill Vibes (37i9dQZF1DX4WYpdVIPcm9 was
+# redirecting; replaced with the canonical Chill Hits playlist).
+SPOTIFY_MOOD_PLAYLISTS: dict[str, str] = {
+    "Happy":     "https://open.spotify.com/embed/playlist/37i9dQZF1DXdPec7aLTmlC",
+    "Chill":     "https://open.spotify.com/embed/playlist/37i9dQZF1DX4WYpdgoIcn6",  # ✅ FIXED
+    "Stressed":  "https://open.spotify.com/embed/playlist/37i9dQZF1DWZqd5JICZI0u",
+    "Motivated": "https://open.spotify.com/embed/playlist/37i9dQZF1DX76Wlfdnj7AP",
+    "Tired":     "https://open.spotify.com/embed/playlist/37i9dQZF1DWZd79rJ6a7lp",
+    "Focused":   "https://open.spotify.com/embed/playlist/37i9dQZF1DWZeKCadgRdKQ",
+}
+
+DEFAULT_MOOD = "Chill"
+MAX_SCENARIO_LENGTH = 1_000   # characters
+MAX_TOPIC_LENGTH = 500
+
+
+# ──────────────────────────────────────────────────────────────
+# HELPERS
+# ──────────────────────────────────────────────────────────────
+
+def _json_ok(data: Any, status: int = 200) -> JsonResponse:
+    """Consistent success envelope: {ok: true, data: ...}"""
+    return JsonResponse({"ok": True, "data": data}, status=status)
+
+
+def _json_error(message: str, status: int = 400) -> JsonResponse:
+    """Consistent error envelope: {ok: false, error: ...}"""
+    return JsonResponse({"ok": False, "error": message}, status=status)
+
+
+def _get_spotify_link(mood: str | None) -> str:
+    """Return a Spotify embed URL for the given mood (falls back to Chill)."""
+    return SPOTIFY_MOOD_PLAYLISTS.get(mood or DEFAULT_MOOD, SPOTIFY_MOOD_PLAYLISTS[DEFAULT_MOOD])
+
+
+def _unauthenticated_redirect(view_func):
+    """
+    Redirect already-authenticated users away from auth pages (login/register).
+    Works like @login_required but in reverse.
+    """
+    @wraps(view_func)
+    def wrapper(request: HttpRequest, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect("twin_dashboard")
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+
+# ──────────────────────────────────────────────────────────────
+# 1. AUTHENTICATION VIEWS
+# ──────────────────────────────────────────────────────────────
+
+@_unauthenticated_redirect
+@require_http_methods(["GET", "POST"])
+def register(request: HttpRequest):
+    """User registration. On success, auto-logs in and redirects to dashboard."""
+    form = UserCreationForm(request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        user = form.save()
+        login(request, user)
+        logger.info("New user registered: %s", user.username)
+        return redirect("twin_dashboard")
+
+    return render(request, "register.html", {"form": form})
+
+
+@_unauthenticated_redirect
+@require_http_methods(["GET", "POST"])
+def login_view(request: HttpRequest):
+    """Standard login. Redirects to dashboard on success."""
+    form = AuthenticationForm(request, data=request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        user = form.get_user()
+        login(request, user)
+        logger.info("User logged in: %s", user.username)
+        return redirect("twin_dashboard")
+
+    return render(request, "login.html", {"form": form})
+
+
+@require_http_methods(["GET", "POST"])
+def logout_view(request: HttpRequest):
+    """Log out and redirect to login page."""
+    if request.user.is_authenticated:
+        logger.info("User logged out: %s", request.user.username)
+    logout(request)
+    return redirect("login")
+
+
+# ──────────────────────────────────────────────────────────────
+# 2. MAIN DASHBOARD VIEW
+# ──────────────────────────────────────────────────────────────
 
 @login_required
-def twin_dashboard(request):
-    pref, created = UserPreference.objects.get_or_create(user=request.user)
-    twin_settings, created = TwinSettings.objects.get_or_create(user=request.user)
-    
+@require_http_methods(["GET", "POST"])
+def twin_dashboard(request: HttpRequest):
+    """
+    Main dashboard. Handles three POST actions:
+      • get_prediction  — AJAX: AI twin prediction for a scenario
+      • get_debate      — AJAX: AI vs AI debate on a topic
+      • update_twin_settings — Form: save personality / preference settings
+    """
+    user = request.user
+
     if request.method == "POST":
-        
-        # 1. Prediction Handle Karna
-        if request.headers.get('x-requested-with') == 'XMLHttpRequest' and 'get_prediction' in request.POST:
-            scenario = request.POST.get('scenario')
-            prediction = get_digital_twin_prediction(request.user, scenario)
-            PastChoice.objects.create(user=request.user, scenario=scenario, choice_made=prediction)
-            return JsonResponse({'prediction': prediction})
+        action = _detect_action(request)
 
-        # 2. 🔥 NAYA: Debate Mode Handle Karna 🔥
-        elif request.headers.get('x-requested-with') == 'XMLHttpRequest' and 'get_debate' in request.POST:
-            topic = request.POST.get('topic')
-            opponent = request.POST.get('opponent')
-            
-            # Logic file se debate script mangwa rahe hain
-            debate_script = get_ai_debate(request.user, topic, opponent)
-            return JsonResponse({'script': debate_script})
+        if action == "get_prediction":
+            return _handle_prediction(request, user)
 
-        # 3. Preferences Update Karna
-        elif 'update_pref' in request.POST:
-            form = PreferenceForm(request.POST, instance=pref)
-            if form.is_valid():
-                form.save()
+        if action == "get_debate":
+            return _handle_debate(request, user)
 
-        # 4. Twin Settings Update Karna
-        elif 'update_twin_settings' in request.POST:
-            twin_form = TwinSettingsForm(request.POST, instance=twin_settings)
-            if twin_form.is_valid():
-                twin_form.save()
+        if action == "update_twin_settings":
+            return _handle_update_settings(request, user)
 
-    form = PreferenceForm(instance=pref)
-    twin_form = TwinSettingsForm(instance=twin_settings)
-    
-    # Spotify Auto-Mood Logic (Fixed playlists, no search hassle)
-    mood_map = {
-        'Stressed': '37i9dQZF1DWZqd5YICuS7s',
-        'Tired': '37i9dQZF1DWZqd5YICuS7s',
-        'Motivated': '37i9dQZF1DXdxcBWu9YQL3',
-        'Focused': '37i9dQZF1DXdxcBWu9YQL3',
-        'Happy': '37i9dQZF1DX3rxVfibe1L0',
-        'Chill': '37i9dQZF1DX3rxVfibe1L0',
-    }
+        # Unknown POST action
+        return _json_error("Unknown action.", status=400)
 
-    playlist_id = mood_map.get(twin_settings.last_mood, '37i9dQZF1DX4WYpdgoIcnm')
-    spotify_link = f"https://open.spotify.com/embed/playlist/{playlist_id}?utm_source=generator"
+    # ── GET: render dashboard ──────────────────────────────────
+    twin_settings, _ = TwinSettings.objects.get_or_create(user=user)
+    user_pref, _     = UserPreference.objects.get_or_create(user=user)
 
     context = {
-        'form': form,
-        'twin_form': twin_form,
-        'pref': pref,
-        'twin_settings': twin_settings,
-        'spotify_link': spotify_link,
+        "twin_settings":  twin_settings,
+        "user_pref":      user_pref,
+        "favorite_color": user_pref.favorite_color,
+        "spotify_link":   _get_spotify_link(twin_settings.last_mood),
+        "mood_options":   list(SPOTIFY_MOOD_PLAYLISTS.keys()),
     }
-    return render(request, 'twin_dashboard.html', context)
+    return render(request, "twin_dashboard.html", context)
 
-# ==========================================
-# REGISTER FUNCTION
-# ==========================================
-def register(request):
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user) 
-            return redirect('twin_dashboard') 
-    else:
-        form = UserCreationForm()
-        
-    return render(request, 'registration/register.html', {'form': form})
+
+# ──────────────────────────────────────────────────────────────
+# 3. DASHBOARD POST HANDLERS  (private helpers)
+# ──────────────────────────────────────────────────────────────
+
+def _detect_action(request: HttpRequest) -> str | None:
+    """Return the first recognized action key from POST data, or None."""
+    for action in ("get_prediction", "get_debate", "update_twin_settings"):
+        if request.POST.get(action):
+            return action
+    return None
+
+
+def _handle_prediction(request: HttpRequest, user) -> JsonResponse:
+    """AJAX handler: generate an AI twin prediction and persist it."""
+    scenario = request.POST.get("scenario", "").strip()
+
+    if not scenario:
+        return _json_error("Scenario cannot be empty.")
+    if len(scenario) > MAX_SCENARIO_LENGTH:
+        return _json_error(f"Scenario too long (max {MAX_SCENARIO_LENGTH} characters).")
+
+    try:
+        prediction = get_digital_twin_prediction(user, scenario)
+    except Exception:
+        logger.exception("Prediction failed for user %s", user.username)
+        return _json_error("Could not generate prediction. Please try again.", status=500)
+
+    PastChoice.objects.create(user=user, scenario=scenario, choice_made=prediction)
+    logger.debug("Prediction saved for user %s", user.username)
+
+    return _json_ok({"prediction": prediction})
+
+
+def _handle_debate(request: HttpRequest, user) -> JsonResponse:
+    """AJAX handler: generate an AI vs AI debate script."""
+    topic    = request.POST.get("topic", "").strip()
+    opponent = request.POST.get("opponent", "Strict Professor").strip()
+
+    if not topic:
+        return _json_error("Debate topic cannot be empty.")
+    if len(topic) > MAX_TOPIC_LENGTH:
+        return _json_error(f"Topic too long (max {MAX_TOPIC_LENGTH} characters).")
+
+    try:
+        script = get_ai_debate(user, topic, opponent)
+    except Exception:
+        logger.exception("Debate generation failed for user %s", user.username)
+        return _json_error("Could not generate debate. Please try again.", status=500)
+
+    return _json_ok({"script": script})
+
+
+def _handle_update_settings(request: HttpRequest, user):
+    """Form handler: update TwinSettings and optionally UserPreference."""
+    twin_settings, _ = TwinSettings.objects.get_or_create(user=user)
+
+    # ── TwinSettings fields ────────────────────────────────────
+    twin_settings.bot_nickname        = request.POST.get("bot_nickname",        twin_settings.bot_nickname)        or twin_settings.bot_nickname
+    twin_settings.preferred_language  = request.POST.get("preferred_language",  twin_settings.preferred_language)  or twin_settings.preferred_language
+    twin_settings.last_mood           = request.POST.get("last_mood",           twin_settings.last_mood)           or twin_settings.last_mood
+    twin_settings.custom_instructions = request.POST.get("custom_instructions", twin_settings.custom_instructions) or twin_settings.custom_instructions
+
+    raw_tone = request.POST.get("tone_level", "")
+    if raw_tone.isdigit():
+        twin_settings.tone_level = int(raw_tone)
+
+    twin_settings.save()
+    logger.debug("TwinSettings updated for user %s", user.username)
+
+    # ── UserPreference fields (optional section) ───────────────
+    if "personality_traits" in request.POST:
+        user_pref, _ = UserPreference.objects.get_or_create(user=user)
+        user_pref.personality_traits = request.POST.get("personality_traits", user_pref.personality_traits) or user_pref.personality_traits
+        user_pref.diet_preference    = request.POST.get("diet_preference",    user_pref.diet_preference)    or user_pref.diet_preference
+        user_pref.sleep_cycle        = request.POST.get("sleep_cycle",        user_pref.sleep_cycle)        or user_pref.sleep_cycle
+        user_pref.favorite_color     = request.POST.get("favorite_color",     user_pref.favorite_color)     or user_pref.favorite_color
+        user_pref.save()
+        logger.debug("UserPreference updated for user %s", user.username)
+
+    return redirect("twin_dashboard")

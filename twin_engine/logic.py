@@ -5,6 +5,7 @@ import time
 import json
 import logging
 import hashlib
+import datetime # 🕒 Naya Import Time-Awareness ke liye
 from dataclasses import dataclass, field
 from functools import lru_cache
 from typing import TYPE_CHECKING, Iterator
@@ -114,9 +115,24 @@ def _groq_client() -> Groq:
 # ---------------------------------------------------------------------------
 
 def get_system_prompt_with_personality(user: AbstractBaseUser) -> str:
-    """Generate system prompt incorporating TwinSettings personality preferences."""
+    """Generate system prompt incorporating TwinSettings personality preferences AND Time-Awareness."""
     from .models import TwinSettings
     
+    # 🕒 1. Real-Time Logic (Naya Feature)
+    now = datetime.datetime.now()
+    current_time = now.strftime("%I:%M %p")
+    hour = now.hour
+    
+    time_instruction = ""
+    if 0 <= hour < 5:
+        time_instruction = f"It's {current_time} (Late Night). You should act slightly irritated or sleepy. Roast the user for still being awake instead of sleeping."
+    elif 5 <= hour < 11:
+        time_instruction = f"It's {current_time} (Morning). You should sound low-energy and lazy, like someone who just woke up and doesn't want to work."
+    elif 11 <= hour < 17:
+        time_instruction = f"It's {current_time} (Mid-day). Focus on productivity, college, or food cravings."
+    else:
+        time_instruction = f"It's {current_time} (Evening/Night). You are in a relaxed, chill mode. Reflect on the day's procrastination."
+
     try:
         settings = TwinSettings.objects.get(user=user)
     except TwinSettings.DoesNotExist:
@@ -130,7 +146,7 @@ def get_system_prompt_with_personality(user: AbstractBaseUser) -> str:
     if settings.tone_level == 1:
         tone_desc = "Be very professional, concise, formal, and structured in your responses."
     elif settings.tone_level == 3:
-        tone_desc = "Be witty, use light humor, sarcasm, and act like a close friend. Make jokes and be playful."
+        tone_desc = "Be witty, use heavy humor, sarcasm, and act like a savage close friend. Roast them gently."
     else:  # Default to casual
         tone_desc = "Be helpful, casual, and friendly — like talking to a buddy."
     
@@ -141,7 +157,7 @@ def get_system_prompt_with_personality(user: AbstractBaseUser) -> str:
     elif settings.preferred_language.lower() == "english":
         lang_instruction = "Use only English — no Hindi or Hinglish."
     else:  # Hinglish
-        lang_instruction = "Use Hinglish (Hindi + English mix) — exactly how real people speak."
+        lang_instruction = "Use Hinglish (Hindi + English mix) — exactly how real people speak in WhatsApp."
     
     # Combine custom instructions
     custom_rules = ""
@@ -152,8 +168,14 @@ def get_system_prompt_with_personality(user: AbstractBaseUser) -> str:
     context_hints = _build_context_hints(profile)
     
     mood_desc = settings.last_mood or 'Happy'
+    
+    # 🕒 Returning Prompt with Time Context
     return f"""\
 Forget you are an AI. You ARE {settings.bot_nickname} ({profile.name}'s Digital Twin). Not a simulation. Not an assistant. You.
+
+━━━ REAL-TIME CONTEXT 🕒 ━━━
+  Current Time: {current_time}
+  Instruction: {time_instruction}
 
 ━━━ WHO YOU ARE ━━━
   Name/Alias: {settings.bot_nickname}
@@ -196,6 +218,10 @@ def _build_context_hints(p: UserProfile) -> str:
 
 
 def _system_prompt(p: UserProfile) -> str:
+    # 🕒 Adding basic time awareness even to the fallback prompt
+    now = datetime.datetime.now()
+    current_time = now.strftime("%I:%M %p")
+
     openers = "\n".join(f'  • "{o}"' for o in _OPENERS)
     context_hints = _build_context_hints(p)
     return f"""\
@@ -208,6 +234,7 @@ Forget you are an AI. You ARE {p.name}. Not a simulation. Not an assistant. You.
   Sleep   : {p.sleep}
   Color   : {p.color}
   Mood    : {p.mood}
+  Time Now: {current_time}
 {context_hints}
 
 ━━━ HOW YOU TALK ━━━
@@ -290,11 +317,16 @@ def _fetch_history(user: AbstractBaseUser) -> list[str]:
 # ---------------------------------------------------------------------------
 
 def _call_llm(req: PredictionRequest) -> str:
+    # 🕒 System prompt generation now includes Time Logic implicitly
     messages = [
         {"role": "system", "content": _system_prompt(req.profile)},
         {"role": "user",   "content": _user_prompt(req)},
     ]
 
+    # Override with settings-based prompt if user is authenticated and settings exist
+    # Note: We keep the architecture unchanged by injecting this within the function
+    # but the public API `get_digital_twin_prediction` passes the request object.
+    
     last_exc: Exception | None = None
     for attempt in range(1, _CFG.max_retries + 1):
         try:
@@ -361,7 +393,34 @@ def get_digital_twin_prediction(user: AbstractBaseUser, scenario: str) -> str:
             scenario=scenario,
             history=_fetch_history(user),
         )
-        return _call_llm(req) or "AI ekdum chup ho gayi — ek baar aur maar."
+        
+        # 🕒 Injecting the Time-Aware personality prompt here before calling LLM
+        messages = [
+            {"role": "system", "content": get_system_prompt_with_personality(user)},
+            {"role": "user",   "content": _user_prompt(req)},
+        ]
+        
+        last_exc: Exception | None = None
+        for attempt in range(1, _CFG.max_retries + 1):
+            try:
+                completion = _groq_client().chat.completions.create(
+                    model=_CFG.model,
+                    messages=messages,
+                    temperature=_CFG.temperature,
+                    max_tokens=_CFG.max_tokens,
+                    top_p=_CFG.top_p,
+                )
+                return completion.choices[0].message.content.strip()
+            except RateLimitError as exc:
+                last_exc = exc
+                delay = _CFG.retry_base_delay * (2 ** (attempt - 1))
+                time.sleep(delay)
+            except APIConnectionError as exc:
+                last_exc = exc
+                delay = _CFG.retry_base_delay * attempt
+                time.sleep(delay)
+        
+        if last_exc: raise last_exc
 
     except EnvironmentError as exc:
         logger.error("Config error: %s", exc)

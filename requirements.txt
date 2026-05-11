@@ -3,7 +3,7 @@ anyio==4.13.0
 asgiref==3.11.1
 certifi==2026.4.22
 distro==1.9.0
-Django==6.0.4
+Django
 groq==1.2.0
 gunicorn==26.0.0
 h11==0.16.0

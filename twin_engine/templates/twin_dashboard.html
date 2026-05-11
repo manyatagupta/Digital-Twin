@@ -387,7 +387,7 @@ body::before { content: ''; position: fixed; inset: 0; background-image: linear-
       </div>
     </div>
 
-    <form id="twinSettingsForm" method="POST">
+    <form id="twinSettingsForm" method="POST" onsubmit="handleTwinSettingsSubmit(event)">
       {% csrf_token %}
       <input type="hidden" name="update_twin_settings" value="1">
       
@@ -768,12 +768,17 @@ async function getPrediction() {
       body: formData
     });
 
-    if (!res.ok) throw new Error('Django Backend Error: ' + res.status);
     const data = await res.json();
-    
-    showOutput(data.prediction, scenario);
-    triggerRoastMeter(data.prediction); // Triggering the smarter logic
-    savePrediction(scenario, data.prediction);
+
+    if (!res.ok || data.ok === false) {
+      throw new Error(data.error || 'Django Backend Error: ' + res.status);
+    }
+
+    const prediction = data.prediction || 'No prediction returned from server.';
+
+    showOutput(prediction, scenario);
+    triggerRoastMeter(prediction);
+    savePrediction(scenario, prediction);
     
   } catch (err) {
     showError(err.message);
@@ -887,9 +892,30 @@ async function startDebate() {
     });
 
     const data = await res.json();
-    area.innerHTML = ''; 
 
-    data.script.forEach((line, index) => {
+    if (!res.ok || data.ok === false) {
+      throw new Error(data.error || 'Debate request failed');
+    }
+
+    let script = data.script || [];
+
+    if (typeof script === 'string') {
+      script = script
+        .split('\n')
+        .filter(Boolean)
+        .map((text, index) => ({
+          speaker: index % 2 === 0 ? 'Twin' : opponent,
+          text
+        }));
+    }
+
+    if (!Array.isArray(script) || script.length === 0) {
+      throw new Error('Debate script empty aaya');
+    }
+
+    area.innerHTML = '';
+
+    script.forEach((line, index) => {
       setTimeout(() => {
         const isTwin = line.speaker === "Twin";
         const align = isTwin ? 'flex-end' : 'flex-start';
@@ -911,7 +937,7 @@ async function startDebate() {
           <div style="font-size: 11px; font-weight: bold; color: ${nameColor}; margin-bottom: 4px; text-transform: uppercase;">
             ${isTwin ? '🤖 Mera Twin' : '🥊 ' + opponent}
           </div>
-          <div style="font-size: 14px; line-height: 1.5; color: var(--text);">${line.text}</div>
+          <div style="font-size: 14px; line-height: 1.5; color: var(--text);">${escapeHtml(line.text)}</div>
         `;
         area.appendChild(bubble);
         area.scrollTop = area.scrollHeight; 
@@ -919,7 +945,7 @@ async function startDebate() {
     });
 
   } catch (err) {
-    area.innerHTML = '<p style="color: red; text-align:center;">API me kuch lafda ho gaya bhai!</p>';
+    area.innerHTML = `<p style="color: red; text-align:center;">${escapeHtml(err.message || 'API me kuch lafda ho gaya bhai!')}</p>`;
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<span>🔥</span> Fight Start Kar';
@@ -970,7 +996,11 @@ function showToast(msg) {
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 2400);
 }
-function escapeHtml(str) { return str.replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/"/g,'"'); }
+function escapeHtml(value) {
+  const div = document.createElement('div');
+  div.textContent = value == null ? '' : String(value);
+  return div.innerHTML;
+}
 function timeAgo(ts) {
   const d = Date.now() - ts;
   if (d < 60000) return 'just now';
@@ -980,4 +1010,40 @@ function timeAgo(ts) {
 }
 </script>
 </body>
-</html>
+</html>    
+async function handleTwinSettingsSubmit(e) {
+  e.preventDefault();
+
+  const form = e.target;
+  const btn = form.querySelector('button[type="submit"]');
+  const oldHtml = btn.innerHTML;
+
+  btn.disabled = true;
+  btn.innerHTML = '<span>⏳</span> Saving...';
+
+  try {
+    const formData = new FormData(form);
+
+    const res = await fetch(window.location.href, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': '{{ csrf_token }}',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: formData
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || data.ok === false) {
+      throw new Error(data.error || 'Settings save failed');
+    }
+
+    showToast('Personality settings saved! 🎭');
+  } catch (err) {
+    showToast(err.message || 'Settings save failed');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = oldHtml;
+  }
+}

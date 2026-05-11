@@ -146,7 +146,7 @@ def twin_dashboard(request: HttpRequest):
             return _handle_update_settings(request, user)
 
         # Unknown POST action
-        return _json_error("Unknown action.", status=400)
+        return _json_error(f"Unknown action. POST keys received: {', '.join(request.POST.keys()) or 'none'}", status=400)
 
     # ── GET: render dashboard ──────────────────────────────────
     twin_settings, _ = TwinSettings.objects.get_or_create(user=user)
@@ -172,10 +172,15 @@ def twin_dashboard(request: HttpRequest):
 # ──────────────────────────────────────────────────────────────
 
 def _detect_action(request: HttpRequest) -> str | None:
-    """Return the first recognized action key from POST data, or None."""
+    """Return the first recognized action key from POST data, even if button value is empty."""
     for action in ("get_prediction", "get_debate", "update_twin_settings"):
-        if request.POST.get(action):
+        if action in request.POST:
             return action
+
+    posted_action = request.POST.get("action", "").strip()
+    if posted_action in {"get_prediction", "get_debate", "update_twin_settings"}:
+        return posted_action
+
     return None
 
 
@@ -190,12 +195,15 @@ def _handle_prediction(request: HttpRequest, user) -> JsonResponse:
 
     try:
         prediction = get_digital_twin_prediction(user, scenario)
-    except Exception:
+    except Exception as exc:
         logger.exception("Prediction failed for user %s", user.username)
-        return _json_error("Could not generate prediction. Please try again.", status=500)
+        return _json_ok({"prediction": f"Prediction error: {exc}"})
 
-    PastChoice.objects.create(user=user, scenario=scenario, choice_made=prediction)
-    logger.debug("Prediction saved for user %s", user.username)
+    try:
+        PastChoice.objects.create(user=user, scenario=scenario, choice_made=prediction)
+        logger.debug("Prediction saved for user %s", user.username)
+    except Exception:
+        logger.exception("Prediction save failed for user %s", user.username)
 
     return _json_ok({"prediction": prediction})
 
@@ -203,7 +211,7 @@ def _handle_prediction(request: HttpRequest, user) -> JsonResponse:
 def _handle_debate(request: HttpRequest, user) -> JsonResponse:
     """AJAX handler: generate an AI vs AI debate script."""
     topic    = request.POST.get("topic", "").strip()
-    opponent = request.POST.get("opponent", "Strict Professor").strip()
+    opponent = request.POST.get("opponent", "Strict Professor").strip() or "Strict Professor"
 
     if not topic:
         return _json_error("Debate topic cannot be empty.")
@@ -212,9 +220,9 @@ def _handle_debate(request: HttpRequest, user) -> JsonResponse:
 
     try:
         script = get_ai_debate(user, topic, opponent)
-    except Exception:
+    except Exception as exc:
         logger.exception("Debate generation failed for user %s", user.username)
-        return _json_error("Could not generate debate. Please try again.", status=500)
+        return _json_ok({"script": f"Debate error: {exc}"})
 
     return _json_ok({"script": script})
 

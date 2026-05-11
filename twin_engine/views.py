@@ -19,7 +19,8 @@ from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
 from .models import PastChoice, TwinSettings, UserPreference
-from .logic import get_ai_debate, get_digital_twin_prediction
+# 👇 Yahan get_funny_roast import kar liya
+from .logic import get_ai_debate, get_digital_twin_prediction, get_funny_roast
 
 logger = logging.getLogger(__name__)
 
@@ -154,12 +155,18 @@ def twin_dashboard(request: HttpRequest):
     twin_settings, _ = TwinSettings.objects.get_or_create(user=user)
     user_pref, _     = UserPreference.objects.get_or_create(user=user)
 
+    current_mood = twin_settings.last_mood or DEFAULT_MOOD
+    
+    # 👇 Funny roast ko fetch kiya
+    mood_roast = get_funny_roast(current_mood)
+
     context = {
         "twin_settings":  twin_settings,
         "user_pref":      user_pref,
         "favorite_color": user_pref.favorite_color,
-        "spotify_link":   _get_spotify_link(twin_settings.last_mood),
+        "spotify_link":   _get_spotify_link(current_mood),
         "mood_options":   list(SPOTIFY_MOOD_PLAYLISTS.keys()),
+        "mood_roast":     mood_roast, # 👇 Context mein bhej diya HTML ke liye
     }
     return render(request, "twin_dashboard.html", context)
 

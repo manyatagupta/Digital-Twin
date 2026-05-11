@@ -94,9 +94,7 @@ def register(request: HttpRequest):
         logger.info("New user registered: %s", user.username)
         return redirect("twin_dashboard")
 
-    return render(request, "register.html", {"form": form})
-
-
+    return render(request, "registration/register.html", {"form": form})
 @_unauthenticated_redirect
 @require_http_methods(["GET", "POST"])
 def login_view(request: HttpRequest):

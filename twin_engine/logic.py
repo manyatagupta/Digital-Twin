@@ -105,14 +105,21 @@ _OPENERS = (
 
 @lru_cache(maxsize=1)
 def _groq_client() -> Groq:
-    """Safely fetch API key from Render Environment Variables."""
-    api_key = os.environ.get("GROQ_API_KEY") or os.getenv("GROQ_API_KEY")
-    
-    # If the key is still missing, throw a clear error to the logs
+    """Create a Groq client using the API key configured in the deployment environment."""
+    api_key = os.getenv("GROQ_API_KEY", "").strip()
+
     if not api_key:
-        logger.error("CRITICAL: GROQ_API_KEY is not found in the environment variables.")
-        raise EnvironmentError("GROQ_API_KEY is missing! Add it in Render Dashboard -> Environment.")
-        
+        logger.error(
+            "CRITICAL: GROQ_API_KEY is missing. Set it in Render Dashboard -> Service -> Environment."
+        )
+        raise EnvironmentError(
+            "GROQ_API_KEY is missing. Add it in Render Dashboard -> Service -> Environment."
+        )
+
+    if not api_key.startswith("gsk_"):
+        logger.error("CRITICAL: GROQ_API_KEY exists but does not look like a valid Groq key.")
+        raise EnvironmentError("GROQ_API_KEY is invalid. Paste the full Groq key starting with gsk_.")
+
     return Groq(api_key=api_key)
 
 
@@ -415,7 +422,7 @@ def get_digital_twin_prediction(user: AbstractBaseUser, scenario: str) -> str:
 
     except EnvironmentError as exc:
         logger.error("Config error: %s", exc)
-        return "API key nahi hai bhai — Render Environment check kar."
+        return f"API key ka issue hai bhai — {exc}"
 
     except RateLimitError:
         logger.warning("Rate limit exhausted after all retries.")
@@ -427,7 +434,7 @@ def get_digital_twin_prediction(user: AbstractBaseUser, scenario: str) -> str:
 
     except APIStatusError as exc:
         logger.error("Groq API %d: %s", exc.status_code, exc.message)
-        return f"Groq ne mana kar diya (HTTP {exc.status_code}) — baad mein try."
+        return f"Groq API error aa gaya (HTTP {exc.status_code}) — API key, billing/quota, ya model name check kar."
 
     except ValueError as exc:
         return f"Input galat hai: {exc}"
@@ -450,9 +457,25 @@ def stream_digital_twin_prediction(user: AbstractBaseUser, scenario: str) -> Ite
         )
         yield from _stream_llm(req)
 
+    except EnvironmentError as exc:
+        logger.error("Streaming config error: %s", exc)
+        yield f"API key ka issue hai bhai — {exc}"
+
+    except RateLimitError:
+        logger.warning("Streaming rate limit exhausted.")
+        yield "Groq ka quota full ho gaya — thodi der baad aana."
+
+    except APIConnectionError:
+        logger.warning("Groq streaming unreachable.")
+        yield "Network ya Groq connection issue hai — Render logs check kar."
+
+    except APIStatusError as exc:
+        logger.error("Groq streaming API %d: %s", exc.status_code, exc.message)
+        yield f"Groq API error aa gaya (HTTP {exc.status_code}) — API key, billing/quota, ya model name check kar."
+
     except Exception:
         logger.exception("Streaming error in stream_digital_twin_prediction")
-        yield "Stream toot gayi yaar — dobara try kar."
+        yield "Stream toot gayi yaar — Render logs me exact error dekh."
 
 
 def get_ai_debate(user: AbstractBaseUser, topic: str, opponent_type: str) -> list[dict]:

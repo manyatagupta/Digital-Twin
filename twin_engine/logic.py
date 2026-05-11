@@ -5,6 +5,7 @@ import time
 import json
 import logging
 import hashlib
+import random
 import datetime # 🕒 Naya Import Time-Awareness ke liye
 from dataclasses import dataclass, field
 from functools import lru_cache
@@ -526,3 +527,42 @@ RULES:
     except Exception as e:
         logger.error("Debate API Error: %s", e)
         return [{"speaker": "System", "text": "Bhai Groq API me error aa gaya. Thodi der me try kar."}]
+    # ... (Tera upar ka saara code same rahega) ...
+
+# ---------------------------------------------------------------------------
+# The "Mood-Based Roast" Function
+# ---------------------------------------------------------------------------
+
+def get_funny_roast(mood: str) -> str:
+    """Returns a funny/sarcastic roast based on the user's selected mood."""
+    import random
+    
+    roasts = {
+        "Happy": [
+            "Zyada khush mat ho, kal Monday hai aur attendance 75% karni hai.",
+            "Itni khushi? Lagta hai Manyata ne code review pass kar diya!"
+        ],
+        "Tired": [
+            "Bhai, aankhein band kar aur so ja. Coding tere bas ki nahi lag rahi abhi.",
+            "System reload ho sakta hai, tu kab reload hoga?"
+        ],
+        "Stressed": [
+            "Stress kyu le raha hai? Backend fati hai ya internal exams aa gaye?",
+            "Itna stress lega toh baal ud jayenge, phir 'Digital Twin' bhi pehchanne se mana kar dega.",
+            "Bhai relax! Coffee pi, stress lene se Django ke bugs solve nahi hote."
+        ],
+        "Focused": [
+            "Oho! Itna focus? Lagta hai aaj pura IoT project ek hi baar mein khatam karega.",
+            "Itna dhyan toh tune kabhi class mein nahi lagaya jitna abhi screen pe hai.",
+            "Focus toh sahi hai, bas beech mein Instagram reels mat khol lena!"
+        ],
+        "Motivated": [
+            "Control Ajay control! Pura internet aaj hi khatam karega kya?",
+            "Motivational video dekh ke aaya hai kya? Do ghante mein utar jayegi."
+        ],
+        "Chill": [
+            "Itna chill? BBD University ke garden mein baitha hai kya?",
+            "Exam ke time bhi itna hi chill rehna, tab maza aayega."
+        ]
+    }
+    return random.choice(roasts.get(mood, ["Mood sahi kar pehle, phir baat karenge."]))

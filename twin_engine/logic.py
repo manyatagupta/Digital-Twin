@@ -6,7 +6,7 @@ import json
 import logging
 import hashlib
 import random
-import datetime # 🕒 Naya Import Time-Awareness ke liye
+import datetime
 from dataclasses import dataclass, field
 from functools import lru_cache
 from typing import TYPE_CHECKING, Iterator
@@ -100,14 +100,19 @@ _OPENERS = (
 
 
 # ---------------------------------------------------------------------------
-# Groq client — singleton, lazy
+# Groq client — API Fix Implementation
 # ---------------------------------------------------------------------------
 
 @lru_cache(maxsize=1)
 def _groq_client() -> Groq:
-    api_key = os.getenv("GROQ_API_KEY")
+    """Safely fetch API key from Render Environment Variables."""
+    api_key = os.environ.get("GROQ_API_KEY") or os.getenv("GROQ_API_KEY")
+    
+    # If the key is still missing, throw a clear error to the logs
     if not api_key:
-        raise EnvironmentError("GROQ_API_KEY is not set in the environment.")
+        logger.error("CRITICAL: GROQ_API_KEY is not found in the environment variables.")
+        raise EnvironmentError("GROQ_API_KEY is missing! Add it in Render Dashboard -> Environment.")
+        
     return Groq(api_key=api_key)
 
 
@@ -116,10 +121,8 @@ def _groq_client() -> Groq:
 # ---------------------------------------------------------------------------
 
 def get_system_prompt_with_personality(user: AbstractBaseUser) -> str:
-    """Generate system prompt incorporating TwinSettings personality preferences AND Time-Awareness."""
     from .models import TwinSettings
     
-    # 🕒 1. Real-Time Logic (Naya Feature)
     now = datetime.datetime.now()
     current_time = now.strftime("%I:%M %p")
     hour = now.hour
@@ -139,38 +142,32 @@ def get_system_prompt_with_personality(user: AbstractBaseUser) -> str:
     except TwinSettings.DoesNotExist:
         return _system_prompt(_fetch_profile(user))
     
-    # Get the base profile
     profile = _fetch_profile(user)
     
-    # Build tone description
     tone_desc = ""
     if settings.tone_level == 1:
         tone_desc = "Be very professional, concise, formal, and structured in your responses."
     elif settings.tone_level == 3:
         tone_desc = "Be witty, use heavy humor, sarcasm, and act like a savage close friend. Roast them gently."
-    else:  # Default to casual
+    else:
         tone_desc = "Be helpful, casual, and friendly — like talking to a buddy."
     
-    # Build language instruction
     lang_instruction = ""
     if settings.preferred_language.lower() == "hindi":
         lang_instruction = "Use pure Hindi (Devanagari script). No English mixing."
     elif settings.preferred_language.lower() == "english":
         lang_instruction = "Use only English — no Hindi or Hinglish."
-    else:  # Hinglish
+    else:
         lang_instruction = "Use Hinglish (Hindi + English mix) — exactly how real people speak in WhatsApp."
     
-    # Combine custom instructions
     custom_rules = ""
     if settings.custom_instructions:
         custom_rules = f"\n\n━━━ CUSTOM RULES (from you) ━━━\n{settings.custom_instructions}"
     
     openers = "\n".join(f'  • "{o}"' for o in _OPENERS)
     context_hints = _build_context_hints(profile)
-    
     mood_desc = settings.last_mood or 'Happy'
     
-    # 🕒 Returning Prompt with Time Context
     return f"""\
 Forget you are an AI. You ARE {settings.bot_nickname} ({profile.name}'s Digital Twin). Not a simulation. Not an assistant. You.
 
@@ -219,7 +216,6 @@ def _build_context_hints(p: UserProfile) -> str:
 
 
 def _system_prompt(p: UserProfile) -> str:
-    # 🕒 Adding basic time awareness even to the fallback prompt
     now = datetime.datetime.now()
     current_time = now.strftime("%I:%M %p")
 
@@ -318,15 +314,10 @@ def _fetch_history(user: AbstractBaseUser) -> list[str]:
 # ---------------------------------------------------------------------------
 
 def _call_llm(req: PredictionRequest) -> str:
-    # 🕒 System prompt generation now includes Time Logic implicitly
     messages = [
         {"role": "system", "content": _system_prompt(req.profile)},
         {"role": "user",   "content": _user_prompt(req)},
     ]
-
-    # Override with settings-based prompt if user is authenticated and settings exist
-    # Note: We keep the architecture unchanged by injecting this within the function
-    # but the public API `get_digital_twin_prediction` passes the request object.
     
     last_exc: Exception | None = None
     for attempt in range(1, _CFG.max_retries + 1):
@@ -395,7 +386,6 @@ def get_digital_twin_prediction(user: AbstractBaseUser, scenario: str) -> str:
             history=_fetch_history(user),
         )
         
-        # 🕒 Injecting the Time-Aware personality prompt here before calling LLM
         messages = [
             {"role": "system", "content": get_system_prompt_with_personality(user)},
             {"role": "user",   "content": _user_prompt(req)},
@@ -425,7 +415,7 @@ def get_digital_twin_prediction(user: AbstractBaseUser, scenario: str) -> str:
 
     except EnvironmentError as exc:
         logger.error("Config error: %s", exc)
-        return "API key nahi hai bhai — .env check kar."
+        return "API key nahi hai bhai — Render Environment check kar."
 
     except RateLimitError:
         logger.warning("Rate limit exhausted after all retries.")
@@ -466,7 +456,6 @@ def stream_digital_twin_prediction(user: AbstractBaseUser, scenario: str) -> Ite
 
 
 def get_ai_debate(user: AbstractBaseUser, topic: str, opponent_type: str) -> list[dict]:
-    """Generates an AI vs AI debate based on user's twin profile and a selected opponent."""
     from .models import TwinSettings
 
     profile = _fetch_profile(user)
@@ -514,7 +503,6 @@ RULES:
         
         response_text = completion.choices[0].message.content.strip()
         
-        # Safely extract JSON array
         start_idx = response_text.find('[')
         end_idx = response_text.rfind(']') + 1
         
@@ -527,14 +515,13 @@ RULES:
     except Exception as e:
         logger.error("Debate API Error: %s", e)
         return [{"speaker": "System", "text": "Bhai Groq API me error aa gaya. Thodi der me try kar."}]
-    # ... (Tera upar ka saara code same rahega) ...
+
 
 # ---------------------------------------------------------------------------
 # The "Mood-Based Roast" Function
 # ---------------------------------------------------------------------------
 
 def get_funny_roast(mood: str) -> str:
-    """Returns a funny/sarcastic roast based on the user's selected mood."""
     import random
     
     roasts = {

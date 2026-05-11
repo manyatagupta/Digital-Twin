@@ -81,10 +81,14 @@ TIME_ZONE = 'Asia/Kolkata'
 USE_I18N = True
 USE_TZ = True
 
-# Static files
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# ==========================================
+# --- STATIC FILES SETTINGS (FIXED) ---
+# ==========================================
+STATIC_URL = '/static/'  # ✅ Slash add kar diya
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') # ✅ Render ke liye perfect
+
+# Ise abhi comment kar diya hai taaki folder na milne ka error na aaye
+# STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

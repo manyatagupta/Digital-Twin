@@ -98,4 +98,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Ab ye tumhe tumhare custom dark mode login par bhejega!
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'  # Login ke baad dashboard par
-LOGOUT_REDIRECT_URL = '/accounts/login/' # Logout ke baad wapas login par
+LOGOUT_REDIRECT_URL = '/accounts/login/' # Logout ke baad wapas login parsss

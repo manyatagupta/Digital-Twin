@@ -19,7 +19,6 @@ from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
 from .models import PastChoice, TwinSettings, UserPreference
-# 👇 Yahan get_funny_roast import kar liya
 from .logic import get_ai_debate, get_digital_twin_prediction, get_funny_roast
 
 logger = logging.getLogger(__name__)
@@ -29,12 +28,9 @@ logger = logging.getLogger(__name__)
 # CONSTANTS
 # ──────────────────────────────────────────────────────────────
 
-# Spotify embed URLs keyed by mood name.
-# "Chill" now points to Chill Vibes (37i9dQZF1DX4WYpdVIPcm9 was
-# redirecting; replaced with the canonical Chill Hits playlist).
 SPOTIFY_MOOD_PLAYLISTS: dict[str, str] = {
     "Happy":     "https://open.spotify.com/embed/playlist/37i9dQZF1DXdPec7aLTmlC",
-    "Chill":     "https://open.spotify.com/embed/playlist/37i9dQZF1DX4WYpdgoIcn6",  # ✅ FIXED
+    "Chill":     "https://open.spotify.com/embed/playlist/37i9dQZF1DX4WYpdgoIcn6",
     "Stressed":  "https://open.spotify.com/embed/playlist/37i9dQZF1DWZqd5JICZI0u",
     "Motivated": "https://open.spotify.com/embed/playlist/37i9dQZF1DX76Wlfdnj7AP",
     "Tired":     "https://open.spotify.com/embed/playlist/37i9dQZF1DWZd79rJ6a7lp",
@@ -95,6 +91,8 @@ def register(request: HttpRequest):
         return redirect("twin_dashboard")
 
     return render(request, "registration/register.html", {"form": form})
+
+
 @_unauthenticated_redirect
 @require_http_methods(["GET", "POST"])
 def login_view(request: HttpRequest):
@@ -107,7 +105,8 @@ def login_view(request: HttpRequest):
         logger.info("User logged in: %s", user.username)
         return redirect("twin_dashboard")
 
-    return render(request, "login.html", {"form": form})
+    # 👇 Ise bhi registration/login.html kar diya hai error se bachne ke liye
+    return render(request, "registration/login.html", {"form": form})
 
 
 @require_http_methods(["GET", "POST"])
@@ -155,7 +154,6 @@ def twin_dashboard(request: HttpRequest):
 
     current_mood = twin_settings.last_mood or DEFAULT_MOOD
     
-    # 👇 Funny roast ko fetch kiya
     mood_roast = get_funny_roast(current_mood)
 
     context = {
@@ -164,7 +162,7 @@ def twin_dashboard(request: HttpRequest):
         "favorite_color": user_pref.favorite_color,
         "spotify_link":   _get_spotify_link(current_mood),
         "mood_options":   list(SPOTIFY_MOOD_PLAYLISTS.keys()),
-        "mood_roast":     mood_roast, # 👇 Context mein bhej diya HTML ke liye
+        "mood_roast":     mood_roast,
     }
     return render(request, "twin_dashboard.html", context)
 
